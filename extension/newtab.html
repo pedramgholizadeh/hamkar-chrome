@@ -22,17 +22,35 @@
       <h1 class="text-xl font-bold text-vanilla">همکار</h1>
       <p class="mt-1 text-sm text-cream/50">فضای کاری تیمی، همان‌جا که تب جدیدت باز می‌شود</p>
 
+      <!-- step 1: email -->
       <form id="login-form" class="mt-6 space-y-3">
         <input id="login-email" type="email" required autocomplete="email" placeholder="you@example.com" class="input text-center" />
-        <button type="submit" class="btn-primary w-full">ورود با ایمیل</button>
+        <button type="submit" class="btn-primary w-full">ادامه</button>
       </form>
 
-      <div id="login-waiting" class="mt-6 hidden">
-        <div class="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-gold/25 border-t-gold"></div>
-        <p class="text-sm font-medium text-vanilla">ایمیل ورود برایت ارسال شد</p>
-        <p class="mt-1 text-xs leading-5 text-cream/45">ایمیل را باز کن و روی دکمه‌ی «ورود به همکار» بزن؛<br>همین صفحه خودکار وارد می‌شود.</p>
-        <button id="login-cancel" class="btn-ghost mt-4">انصراف</button>
-      </div>
+      <!-- step 2a: password (returning user) -->
+      <form id="password-form" class="mt-6 space-y-3 hidden">
+        <p class="text-xs text-cream/45">رمز عبور حسابت را وارد کن</p>
+        <input id="login-password" type="password" required autocomplete="current-password" placeholder="رمز عبور" class="input text-center" />
+        <button type="submit" class="btn-primary w-full">ورود</button>
+        <button type="button" id="forgot-btn" class="btn-ghost w-full text-xs text-cream/40">رمزم را فراموش کرده‌ام — با کد یکبارمصرف وارد شوم</button>
+      </form>
+
+      <!-- step 2b: one-time code -->
+      <form id="otp-form" class="mt-6 space-y-3 hidden">
+        <p class="text-xs leading-5 text-cream/45">کد ۶ رقمی به <span id="otp-email" class="text-gold"></span> ارسال شد<br><span class="text-cream/30">(۲ دقیقه اعتبار دارد)</span></p>
+        <input id="login-code" inputmode="numeric" maxlength="6" dir="ltr" placeholder="······" class="input text-center font-mono text-2xl tracking-[0.45em]" />
+        <button type="submit" class="btn-primary w-full">تأیید کد</button>
+        <button type="button" id="resend-btn" class="btn-ghost w-full text-xs text-cream/40" disabled>ارسال مجدد تا ۲:۰۰</button>
+      </form>
+
+      <!-- step 3: set password -->
+      <form id="newpass-form" class="mt-6 space-y-3 hidden">
+        <p class="text-xs text-cream/45">کد تأیید شد ✅ — برای حسابت رمز عبور تعیین کن<br><span class="text-cream/30">(دفعات بعد با همین رمز وارد می‌شوی)</span></p>
+        <input id="newpass" type="password" required autocomplete="new-password" placeholder="رمز عبور (حداقل ۸ کاراکتر)" class="input text-center" />
+        <input id="newpass2" type="password" required autocomplete="new-password" placeholder="تکرار رمز عبور" class="input text-center" />
+        <button type="submit" class="btn-primary w-full">ذخیره و ورود</button>
+      </form>
 
       <p id="login-error" class="mt-4 hidden rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-300"></p>
     </div>

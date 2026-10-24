@@ -215,12 +215,38 @@ $tables = [
           CONSTRAINT fk_att_meeting FOREIGN KEY (meeting_id) REFERENCES team_meetings (id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL,
+    'otp_codes' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS otp_codes (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          email VARCHAR(190) NOT NULL,
+          code_hash CHAR(64) NOT NULL,
+          attempts INT NOT NULL DEFAULT 0,
+          used_at DATETIME DEFAULT NULL,
+          created_at DATETIME NOT NULL,
+          expires_at DATETIME NOT NULL,
+          KEY ix_otp_email (email),
+          KEY ix_otp_expires (expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
+    'password_setups' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS password_setups (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          email VARCHAR(190) NOT NULL,
+          token CHAR(64) NOT NULL,
+          used_at DATETIME DEFAULT NULL,
+          created_at DATETIME NOT NULL,
+          expires_at DATETIME NOT NULL,
+          UNIQUE KEY uq_password_setup_token (token),
+          KEY ix_setup_email (email)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
 ];
 
 // ---------------------------------------------------------------- migrations
 // Idempotent column additions for installs created before these features.
 $migrations = [
     'ALTER TABLE users ADD COLUMN first_name VARCHAR(80) DEFAULT NULL AFTER email',
+    'ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) DEFAULT NULL AFTER email',
     'ALTER TABLE users ADD COLUMN last_name VARCHAR(80) DEFAULT NULL AFTER first_name',
     'ALTER TABLE users ADD COLUMN avatar_file_id BIGINT UNSIGNED DEFAULT NULL AFTER name',
     'ALTER TABLE users ADD COLUMN last_seen_at DATETIME DEFAULT NULL',

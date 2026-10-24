@@ -42,9 +42,10 @@ Database::init($config['db']);
 Router::add('GET', '', fn () => Http::json(['ok' => true, 'service' => 'hamkar-api', 'time' => gmdate('c')]));
 
 // auth & profile
-Router::add('POST', 'auth/request', fn ($p) => AuthController::request($config));
-Router::add('GET', 'auth/poll', fn ($p) => AuthController::poll());
-Router::add('GET', 'auth/verify', fn ($p) => AuthController::verify());
+Router::add('POST', 'auth/start', fn ($p) => AuthController::start($config));
+Router::add('POST', 'auth/login', fn ($p) => AuthController::login());
+Router::add('POST', 'auth/otp/verify', fn ($p) => AuthController::verifyOtp());
+Router::add('POST', 'auth/password', fn ($p) => AuthController::setPassword());
 Router::add('POST', 'auth/logout', fn ($p) => AuthController::logout());
 Router::add('GET', 'me', fn ($p) => ProfileController::me());
 Router::add('PATCH', 'me', fn ($p) => ProfileController::update());

@@ -184,3 +184,29 @@ CREATE TABLE IF NOT EXISTS meeting_attendance (
   UNIQUE KEY uq_meeting_attendance (meeting_id, user_id),
   CONSTRAINT fk_att_meeting FOREIGN KEY (meeting_id) REFERENCES team_meetings (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────── v0.3 auth additions ───────────────────────
+-- users: password_hash VARCHAR(255) (nullable — set via OTP flow)
+
+CREATE TABLE IF NOT EXISTS otp_codes (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(190) NOT NULL,
+  code_hash CHAR(64) NOT NULL,
+  attempts INT NOT NULL DEFAULT 0,
+  used_at DATETIME DEFAULT NULL,
+  created_at DATETIME NOT NULL,
+  expires_at DATETIME NOT NULL,
+  KEY ix_otp_email (email),
+  KEY ix_otp_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS password_setups (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(190) NOT NULL,
+  token CHAR(64) NOT NULL,
+  used_at DATETIME DEFAULT NULL,
+  created_at DATETIME NOT NULL,
+  expires_at DATETIME NOT NULL,
+  UNIQUE KEY uq_password_setup_token (token),
+  KEY ix_setup_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

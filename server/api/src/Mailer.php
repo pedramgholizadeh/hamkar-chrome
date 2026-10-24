@@ -44,6 +44,18 @@ final class Mailer
 
         if ($response === false || $status >= 300) {
             error_log('[hamkar] resend failed: status=' . $status . ' err=' . $curlError . ' body=' . (string) $response);
+            // surface the actual cause so it is fixable without digging into logs
+            $body = json_decode((string) $response, true);
+            $resendMessage = strtolower((string) ($body['message'] ?? ''));
+            if ($status === 401) {
+                Http::error(502, 'mail_auth_failed');
+            }
+            if ($status === 403 || $status === 422 && str_contains($resendMessage, 'domain')) {
+                Http::error(502, 'mail_domain_not_verified');
+            }
+            if ($status === 422 && str_contains($resendMessage, 'from')) {
+                Http::error(502, 'mail_invalid_from');
+            }
             Http::error(502, 'mail_delivery_failed');
         }
 

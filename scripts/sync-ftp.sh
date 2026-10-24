@@ -54,6 +54,10 @@ mirror -R ${DRY_RUN_FLAG} --delete --verbose \
   --exclude-glob .DS_Store \
   --exclude-glob *.md \
   "$ROOT/server" "$FTP_REMOTE_DIR"
+
+mirror -R ${DRY_RUN_FLAG} --delete --verbose \
+  --exclude-glob .DS_Store \
+  "$ROOT/landing" "${FTP_REMOTE_DIR%/}/landing"
 bye
 EOF
 

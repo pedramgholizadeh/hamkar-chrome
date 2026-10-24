@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>همکار — دستیار تیمی در هر تب جدید کروم</title>
+  <meta name="description" content="همکار یک اکستنشن متن‌باز کروم است که هر تب جدید را به مرکز مدیریت تیم، پروژه، تسک و چت تبدیل می‌کند. رایگان و متن‌باز." />
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:    '#030164',
+            steel:  '#253C6D',
+            slate2: '#455B8A',
+            gold:   '#FCAD38',
+            cream:  '#FCF9EA',
+            sand:   '#FFFAD3',
+          },
+          fontFamily: {
+            vazir: ['Vazirmatn', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- فونت وزیرمتن -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" />
+
+  <!-- آیکون‌های گوگل متریال -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0" />
+
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body class="font-vazir bg-ink text-cream antialiased overflow-x-hidden min-h-screen">
+
+  <!-- بلاب‌های شیشه‌ای پس‌زمینه -->
+  <div class="blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="noise"></div>
+  </div>
+
+  <!-- ناوبری -->
+  <header class="fixed top-0 inset-x-0 z-50">
+    <nav class="glass mx-auto mt-4 max-w-6xl flex items-center justify-between rounded-2xl px-5 py-3 mx-4">
+      <a href="#top" class="flex items-center gap-2">
+        <span class="material-symbols-rounded text-gold text-3xl">handshake</span>
+        <span class="text-lg font-bold">همکار</span>
+      </a>
+      <div class="hidden md:flex items-center gap-7 text-sm text-sand/80">
+        <a href="#about"    class="hover:text-gold transition-colors">معرفی</a>
+        <a href="#features" class="hover:text-gold transition-colors">قابلیت‌ها</a>
+        <a href="#how"      class="hover:text-gold transition-colors">نحوه‌ی کار</a>
+        <a href="#install"  class="hover:text-gold transition-colors">نصب</a>
+      </div>
+      <a href="#install" class="btn-gold flex items-center gap-1.5 text-sm">
+        <span class="material-symbols-rounded text-xl">download</span>
+        دانلود اکستنشن
+      </a>
+    </nav>
+  </header>
+
+  <main id="top" class="relative z-10">
+
+    <!-- هیرو -->
+    <section class="max-w-6xl mx-auto px-6 pt-40 pb-24 text-center">
+      <span class="reveal glass-pill inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs text-sand/90 mb-8">
+        <span class="material-symbols-rounded text-gold text-base">open_source</span>
+        متن‌باز و رایگان — نسخه‌ی v0.1.0
+      </span>
+      <h1 class="reveal text-4xl md:text-6xl font-black leading-tight">
+        هر تب جدید،
+        <span class="text-gold">مرکز فرمان تیمِ</span>
+        شما
+      </h1>
+      <p class="reveal mx-auto mt-6 max-w-2xl text-base md:text-lg leading-8 text-sand/75">
+        «همکار» یک اکستنشن کروم است که تب جدید مرورگر را به یک فضای کاری کامل تبدیل می‌کند:
+        مدیریت تیم‌ها، پروژه‌ها و تسک‌ها به‌همراه چت زنده‌ی هر پروژه — بدون ترک کردن مرورگر.
+      </p>
+      <div class="reveal mt-10 flex flex-wrap items-center justify-center gap-4">
+        <a id="dl-hero" href="https://github.com/pedramgholizadeh/hamkar-chrome/releases/latest/download/hamkar-extension-latest.zip"
+           class="btn-gold text-base px-7 py-3.5 rounded-2xl flex items-center gap-2">
+          <span class="material-symbols-rounded">download</span>
+          دانلود مستقیم (.zip)
+        </a>
+        <a href="https://github.com/pedramgholizadeh/hamkar-chrome" target="_blank" rel="noopener"
+           class="btn-ghost text-base px-7 py-3.5 rounded-2xl flex items-center gap-2">
+          <span class="material-symbols-rounded">code</span>
+          مشاهده در گیت‌هاب
+        </a>
+      </div>
+
+      <!-- ماکاپ شیشه‌ای -->
+      <div class="reveal glass mt-16 mx-auto max-w-4xl rounded-3xl p-5 md:p-8 text-right">
+        <div class="flex items-center gap-2 mb-5">
+          <span class="w-3 h-3 rounded-full bg-gold/80"></span>
+          <span class="w-3 h-3 rounded-full bg-slate2"></span>
+          <span class="w-3 h-3 rounded-full bg-steel"></span>
+          <span class="ms-auto text-xs text-sand/50 flex items-center gap-1">
+            <span class="material-symbols-rounded text-sm">tab</span> تب جدید کروم
+          </span>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="glass-inner rounded-2xl p-4">
+            <span class="material-symbols-rounded text-gold">groups</span>
+            <p class="mt-2 text-sm font-bold">تیم‌ها</p>
+            <p class="mt-1 text-xs text-sand/60">ساخت تیم و دعوت اعضا با کد یا ایمیل</p>
+          </div>
+          <div class="glass-inner rounded-2xl p-4">
+            <span class="material-symbols-rounded text-gold">folder_open</span>
+            <p class="mt-2 text-sm font-bold">پروژه‌ها</p>
+            <p class="mt-1 text-xs text-sand/60">شخصی یا مشترک در تیم، با مالکیت مشخص</p>
+          </div>
+          <div class="glass-inner rounded-2xl p-4">
+            <span class="material-symbols-rounded text-gold">chat_bubble</span>
+            <p class="mt-2 text-sm font-bold">چت پروژه</p>
+            <p class="mt-1 text-xs text-sand/60">گفت‌وگوی زنده با ارسال فایل و تصویر</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- معرفی -->
+    <section id="about" class="max-w-6xl mx-auto px-6 py-24">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="reveal">
+          <h2 class="text-3xl md:text-4xl font-extrabold">
+            پروژه‌ی <span class="text-gold">همکار</span> چیست؟
+          </h2>
+          <p class="mt-6 leading-8 text-sand/75">
+            همکار یک ابزار مدیریت کار تیمیِ متن‌باز است که مستقیم داخل مرورگر زندگی می‌کند.
+            به‌جای پریدن بین ده‌ها تب و اپلیکیشن، هر بار که تب جدیدی باز می‌کنید، صفحه‌ی ورودِ
+            همکار نمایش داده می‌شود: ورود ایمیل با لینک یک‌بارمصرف، تیم‌ها و پروژه‌های شما،
+            تسک‌های روزانه و چت هر پروژه — همه در یک نگاه.
+          </p>
+          <p class="mt-4 leading-8 text-sand/75">
+            سمت سرور یک بک‌اند سبک PHP 8 + MySQL است که روی هر هاست اشتراکی قابل نصب است
+            و فایل‌های اشتراک‌گذاری‌شده در چت، همیشه با توکن و فقط برای اعضای پروژه قابل دسترسی‌اند.
+          </p>
+          <ul class="mt-6 space-y-3 text-sm text-sand/80">
+            <li class="flex items-center gap-2"><span class="material-symbols-rounded text-gold text-xl">license</span> مجازش آزاد، کد کاملاً متن‌باز روی گیت‌هاب</li>
+            <li class="flex items-center gap-2"><span class="material-symbols-rounded text-gold text-xl">dns</span> بک‌اند ساده روی هاست خودتان — بدون وابستگی به سرویس خارجی</li>
+            <li class="flex items-center gap-2"><span class="material-symbols-rounded text-gold text-xl">lock</span> فایل‌های خصوصی با توکن محافظت می‌شوند (لینک مستقیم ۴۰۳)</li>
+          </ul>
+        </div>
+        <div class="reveal glass rounded-3xl p-8 grid grid-cols-2 gap-5 text-center">
+          <div>
+            <p class="text-3xl font-black text-gold">۳</p>
+            <p class="mt-1 text-xs text-sand/60">لایه: تیم / پروژه / تسک</p>
+          </div>
+          <div>
+            <p class="text-3xl font-black text-gold">۱</p>
+            <p class="mt-1 text-xs text-sand/60">چت زنده در هر پروژه</p>
+          </div>
+          <div>
+            <p class="text-3xl font-black text-gold">۰</p>
+            <p class="mt-1 text-xs text-sand/60">هزینه و اشتراک</p>
+          </div>
+          <div>
+            <p class="text-3xl font-black text-gold">۱۰۰٪</p>
+            <p class="mt-1 text-xs text-sand/60">متن‌باز</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- قابلیت‌ها -->
+    <section id="features" class="max-w-6xl mx-auto px-6 py-24">
+      <h2 class="reveal text-3xl md:text-4xl font-extrabold text-center">قابلیت‌ها</h2>
+      <p class="reveal mt-3 text-center text-sand/60">همه‌چیزهایی که در تب جدیدِ مرورگرِ شما جا گرفته است</p>
+      <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="reveal glass card rounded-2xl p-6">
+          <span class="material-symbols-rounded text-gold text-3xl">mail</span>
+          <h3 class="mt-4 font-bold">ورود بدون رمز (Magic Link)</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">فقط ایمیل بزنید، روی لینک یک‌بارمصرف کلیک کنید و وارد شوید. نشست شما ماندگار است.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6">
+          <span class="material-symbols-rounded text-gold text-3xl">groups</span>
+          <h3 class="mt-4 font-bold">تیم‌ها و دعوت اعضا</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">تیم بسازید و همکاران را با کد دعوت یا ارسال ایمیلِ دعوت‌نامه عضو کنید.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6">
+          <span class="material-symbols-rounded text-gold text-3xl">folder_open</span>
+          <h3 class="mt-4 font-bold">پروژه‌های شخصی و تیمی</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">پروژه‌ها یا مال شما هستند یا متعلق به یک تیم — با دسترسی اعضا.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6">
+          <span class="material-symbols-rounded text-gold text-3xl">checklist</span>
+          <h3 class="mt-4 font-bold">تسک‌ها و محول کردن کار</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">برای خودتان یا دیگر اعضا تسک بسازید، تیک بزنید و پیشرفت را ببینید.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6">
+          <span class="material-symbols-rounded text-gold text-3xl">chat_bubble</span>
+          <h3 class="mt-4 font-bold">چت تلگرام‌مانند پروژه</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">گفت‌وگوی زنده در هر پروژه با ارسال متن، فایل و تصویر به‌همراه پیش‌نمایش.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6">
+          <span class="material-symbols-rounded text-gold text-3xl">shield_lock</span>
+          <h3 class="mt-4 font-bold">امنیت فایل‌ها</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">رسانه‌ها فقط با توکن و برای اعضای همان پروژه سرو می‌شوند؛ لینک مستقیم جواب نمی‌دهد.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- نحوه‌ی کار -->
+    <section id="how" class="max-w-6xl mx-auto px-6 py-24">
+      <h2 class="reveal text-3xl md:text-4xl font-extrabold text-center">چطور کار می‌کند؟</h2>
+      <p class="reveal mt-3 text-center text-sand/60">چهار قدم ساده از نصب تا هم‌افزایی تیمی</p>
+      <div class="mt-14 grid md:grid-cols-4 gap-6">
+        <div class="reveal glass card rounded-2xl p-6 text-center">
+          <span class="step-num">۱</span>
+          <span class="material-symbols-rounded text-gold text-3xl mt-3 block">extension</span>
+          <h3 class="mt-3 font-bold">نصب اکستنشن</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">زیپ را دانلود کنید و از <span dir="ltr" class="text-gold/90">chrome://extensions</span> به‌صورت Developer mode نصبش کنید.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6 text-center">
+          <span class="step-num">۲</span>
+          <span class="material-symbols-rounded text-gold text-3xl mt-3 block">forward_to_inbox</span>
+          <h3 class="mt-3 font-bold">ورود با ایمیل</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">تب جدید را باز کنید، ایمیلتان را وارد کنید و روی لینک ورودی کلیک بزنید.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6 text-center">
+          <span class="step-num">۳</span>
+          <span class="material-symbols-rounded text-gold text-3xl mt-3 block">group_add</span>
+          <h3 class="mt-3 font-bold">ساخت تیم و پروژه</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">تیم بسازید، همکاران را دعوت کنید و پروژه‌های مشترک را اضافه کنید.</p>
+        </div>
+        <div class="reveal glass card rounded-2xl p-6 text-center">
+          <span class="step-num">۴</span>
+          <span class="material-symbols-rounded text-gold text-3xl mt-3 block">diversity_3</span>
+          <h3 class="mt-3 font-bold">تسک بچینید، چت بزنید</h3>
+          <p class="mt-2 text-sm leading-7 text-sand/65">کارها را محول و تیک بزنید و در چت همان پروژه هماهنگ شوید.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- نصب / CTA -->
+    <section id="install" class="max-w-4xl mx-auto px-6 py-24">
+      <div class="reveal glass rounded-3xl p-10 text-center">
+        <span class="material-symbols-rounded text-gold text-5xl">rocket_launch</span>
+        <h2 class="mt-4 text-3xl font-extrabold">همین حالا امتحان کنید</h2>
+        <p class="mt-3 text-sand/70">آخرین نسخه به‌صورت خودکار با هر پوش روی master ساخته و منتشر می‌شود.</p>
+        <div class="mt-8 flex flex-wrap justify-center gap-4">
+          <a id="dl-cta" href="https://github.com/pedramgholizadeh/hamkar-chrome/releases/latest/download/hamkar-extension-latest.zip"
+             class="btn-gold text-base px-7 py-3.5 rounded-2xl flex items-center gap-2">
+            <span class="material-symbols-rounded">download</span>
+            دانلود مستقیم آخرین نسخه (.zip)
+          </a>
+          <a href="https://github.com/pedramgholizadeh/hamkar-chrome" target="_blank" rel="noopener"
+             class="btn-ghost text-base px-7 py-3.5 rounded-2xl flex items-center gap-2">
+            <span class="material-symbols-rounded">code</span>
+            ریپازیتوری گیت‌هاب
+          </a>
+        </div>
+        <p class="mt-8 text-xs text-sand/50 leading-6">
+          پس از دانلود: زیپ را Extract کنید ← در <span dir="ltr">chrome://extensions</span> حالت Developer mode را روشن کنید
+          ← <span dir="ltr">Load unpacked</span> ← پوشه‌ی <span dir="ltr">extension</span> را انتخاب کنید.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative z-10 border-t border-steel/30 py-8 text-center text-xs text-sand/50">
+    <p>
+      همکار — پروژه‌ای متن‌باز تحت مجوز
+      <a href="https://github.com/pedramgholizadeh/hamkar-chrome/blob/master/LICENSE" target="_blank" rel="noopener" class="text-gold/80 hover:text-gold">MIT</a>
+      · ساخته‌شده با ❤ برای تیم‌های فارسی‌زبان
+    </p>
+    <p class="mt-2" dir="ltr">github.com/pedramgholizadeh/hamkar-chrome</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

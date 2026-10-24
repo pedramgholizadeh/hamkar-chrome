@@ -16,7 +16,7 @@ const Projects = {
       return;
     }
     box.innerHTML = App.state.projects.map((p) => `
-      <button data-project="${p.id}" class="flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-right text-sm transition hover:bg-white/5 ${App.state.currentProject && App.state.currentProject.id === p.id ? 'bg-gold/15 font-medium text-gold' : ''}">
+      <button data-project="${p.id}" class="flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-right text-sm transition hover:bg-white/5 ${App.state.currentProject && App.state.currentProject.id === p.id ? 'bg-accent/15 font-medium text-accent' : ''}">
         <span class="shrink-0 text-xs">${p.team_id ? '👥' : '📁'}</span>
         <span class="min-w-0 flex-1 truncate">${Util.esc(p.name)}</span>
       </button>`).join('');
@@ -59,6 +59,7 @@ const Projects = {
             </div>
           </div>
           <div id="project-progress" class="mt-2"></div>
+          <div id="project-stats" class="mt-3 grid grid-cols-4 gap-2"></div>
         </div>
         <div id="panel" class="min-h-0 flex-1"></div>
       </div>`;
@@ -68,12 +69,55 @@ const Projects = {
 
     Projects.paintRepoChip(data.project);
     Projects.loadProgress(projectId);
+    Projects.loadStats(projectId);
     Projects.setTab(tab);
+  },
+
+  /** Bento stats strip: progress, open tasks, phases, versions. */
+  async loadStats(projectId) {
+    const box = Util.byId('project-stats');
+    if (!box) return;
+    box.innerHTML = '<div class="panel col-span-4 p-3 text-center text-xs text-cream/30">در حال بارگذاری…</div>';
+    try {
+      const [tasks, phases, versions] = await Promise.all([
+        Api.request(`projects/${projectId}/tasks`),
+        Api.request(`projects/${projectId}/phases`).catch(() => ({ phases: [] })),
+        Api.request(`projects/${projectId}/versions`).catch(() => ({ versions: [] })),
+      ]);
+      const total = tasks.tasks.length;
+      const done = tasks.tasks.filter((t) => t.done).length;
+      const open = total - done;
+      const pct = total ? Math.round((done / total) * 100) : 0;
+
+      const stat = (icon, value, label, cls = 'text-vanilla') => `
+        <div class="panel flex items-center gap-3 p-3">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">${Util.icon(icon, 'text-lg text-accent')}</div>
+          <div class="min-w-0">
+            <p class="text-sm font-extrabold leading-4 ${cls}">${value}</p>
+            <p class="text-[10px] text-cream/40">${label}</p>
+          </div>
+        </div>`;
+
+      box.innerHTML =
+        `<div class="panel col-span-2 flex items-center gap-3 p-3">
+          <div class="h-9 w-9 shrink-0">${Util.icon('data_usage', 'text-lg text-cyan')}</div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-extrabold leading-4 text-vanilla">٪${pct} پیشرفت</p>
+            <div class="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
+              <div class="h-full rounded-full bg-gradient-to-l from-accent to-cyan transition-all" style="width:${pct}%"></div>
+            </div>
+          </div>
+        </div>`
+        + stat('check_circle', open, 'تسک باز')
+        + stat('new_releases', versions.versions.length, 'نسخه');
+    } catch {
+      box.innerHTML = '';
+    }
   },
 
   setTab(tab) {
     Projects.tab = tab;
-    const on = 'rounded-lg bg-gradient-to-b from-gold to-gold/85 px-3 py-1.5 font-semibold text-ink shadow transition';
+    const on = 'rounded-lg bg-gradient-to-b from-accent to-accent/85 px-3 py-1.5 font-semibold text-ink shadow transition';
     const off = 'rounded-lg px-3 py-1.5 text-cream/50 transition hover:text-cream';
     Util.byId('main').querySelectorAll('[data-tab]').forEach((btn) => {
       btn.className = btn.dataset.tab === tab ? on : off;
@@ -97,7 +141,7 @@ const Projects = {
       bar.innerHTML = total ? `
         <div class="flex items-center gap-2">
           <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-            <div class="h-full rounded-full bg-gradient-to-l from-gold to-gold/60 transition-all" style="width:${pct}%"></div>
+            <div class="h-full rounded-full bg-gradient-to-l from-accent to-accent/60 transition-all" style="width:${pct}%"></div>
           </div>
           <span class="text-[10px] text-cream/40">${done} از ${total} · ٪${pct}</span>
         </div>` : '';
@@ -110,10 +154,10 @@ const Projects = {
     const chip = Util.byId('repo-chip');
     if (!chip) return;
     if (project.repo_url) {
-      chip.innerHTML = `<a href="${Util.esc(project.repo_url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-white/5 px-2 py-0.5 transition hover:bg-white/10 hover:text-gold">
+      chip.innerHTML = `<a href="${Util.esc(project.repo_url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-white/5 px-2 py-0.5 transition hover:bg-white/10 hover:text-accent">
         ${Util.icon('code', 'text-sm')} ریپازیتوری</a>`;
     } else {
-      chip.innerHTML = `<button id="repo-add-btn" class="inline-flex items-center gap-1 rounded-lg border border-dashed border-white/20 px-2 py-0.5 text-cream/40 transition hover:border-gold/40 hover:text-gold">
+      chip.innerHTML = `<button id="repo-add-btn" class="inline-flex items-center gap-1 rounded-lg border border-dashed border-white/20 px-2 py-0.5 text-cream/40 transition hover:border-accent/40 hover:text-accent">
         ${Util.icon('add_link', 'text-sm')} ثبت ریپازیتوری</button>`;
       Util.byId('repo-add-btn').addEventListener('click', () => Projects.repoEditor(project.id, ''));
     }
@@ -174,12 +218,12 @@ const Projects = {
       const pct = ph.task_count ? Math.round((ph.done_count / ph.task_count) * 100) : 0;
       return `
       <div class="card flex items-center gap-3 p-4">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gold/15 text-sm font-bold text-gold">${i + 1}</div>
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-sm font-bold text-accent">${i + 1}</div>
         <div class="min-w-0 flex-1">
           <p class="truncate text-sm font-medium">${Util.esc(ph.title)}</p>
           <div class="mt-1.5 flex items-center gap-2">
             <div class="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
-              <div class="h-full rounded-full bg-gold/70" style="width:${pct}%"></div>
+              <div class="h-full rounded-full bg-accent/70" style="width:${pct}%"></div>
             </div>
             <span class="text-[10px] text-cream/35">${ph.done_count}/${ph.task_count}</span>
           </div>
@@ -237,7 +281,7 @@ const Projects = {
     box.innerHTML = data.versions.map((v) => `
       <div class="card relative p-4 pe-12">
         <div class="flex items-center gap-2">
-          <span class="chip bg-gold/15 font-mono text-gold">v${Util.esc(v.name)}</span>
+          <span class="chip bg-accent/15 font-mono text-accent">v${Util.esc(v.name)}</span>
           <span class="text-[10px] text-cream/35">${Util.dateTimeFa(v.created_at)} · ${Util.esc(v.creator.display_name)}</span>
           <button data-del-version="${v.id}" class="btn-ghost ms-auto h-6 px-1 text-rose-300/60">${Util.icon('delete', 'text-sm')}</button>
         </div>

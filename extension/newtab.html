@@ -7,91 +7,143 @@
 </head>
 <body class="h-screen overflow-hidden bg-ink text-cream">
 
-  <!-- ambient liquid-glass background -->
+  <!-- ambient aurora background -->
   <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-    <div class="absolute -top-40 -right-32 h-[28rem] w-[28rem] rounded-full bg-navy/70 blur-3xl"></div>
-    <div class="absolute top-1/2 -left-32 h-96 w-96 rounded-full bg-gold/15 blur-3xl"></div>
-    <div class="absolute -bottom-40 right-1/3 h-[26rem] w-[26rem] rounded-full bg-steel/40 blur-3xl"></div>
-    <div class="absolute top-16 left-1/4 h-72 w-72 rounded-full bg-gold/10 blur-3xl"></div>
+    <div class="absolute -top-40 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-[130px]"></div>
+    <div class="absolute top-1/3 -left-32 h-[26rem] w-[26rem] rounded-full bg-cyan/15 blur-[130px]"></div>
+    <div class="absolute -bottom-40 right-1/4 h-[26rem] w-[26rem] rounded-full bg-fuchsia-600/10 blur-[130px]"></div>
   </div>
 
   <!-- ═══════════════ Login ═══════════════ -->
   <section id="login-view" class="hidden h-screen items-center justify-center p-6">
-    <div class="card w-full max-w-sm p-8 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-gold to-gold/80 text-2xl text-ink shadow-lg shadow-gold/25">🤝</div>
-      <h1 class="text-xl font-bold text-vanilla">همکار</h1>
-      <p class="mt-1 text-sm text-cream/50">فضای کاری تیمی، همان‌جا که تب جدیدت باز می‌شود</p>
+    <div class="relative w-full max-w-sm">
+      <!-- glow -->
+      <div class="absolute -inset-2 -z-10 rounded-[2rem] bg-gradient-to-l from-accent/40 via-fuchsia-500/20 to-cyan/40 blur-2xl"></div>
 
-      <!-- step 1: email -->
-      <form id="login-form" class="mt-6 space-y-3">
-        <input id="login-email" type="email" required autocomplete="email" placeholder="you@example.com" class="input text-center" />
-        <button type="submit" class="btn-primary w-full">ادامه</button>
-      </form>
+      <div class="panel p-8">
+        <div class="text-center">
+          <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-cyan text-2xl shadow-lg shadow-accent/40">🤝</div>
+          <h1 class="text-xl font-extrabold text-vanilla">همکار</h1>
+          <p class="mt-1 text-sm text-cream/50">فضای کاری تیمی، همان‌جا که تب جدیدت باز می‌شود</p>
+        </div>
 
-      <!-- step 2a: password (returning user) -->
-      <form id="password-form" class="mt-6 space-y-3 hidden">
-        <p class="text-xs text-cream/45">رمز عبور حسابت را وارد کن</p>
-        <input id="login-password" type="password" required autocomplete="current-password" placeholder="رمز عبور" class="input text-center" />
-        <button type="submit" class="btn-primary w-full">ورود</button>
-        <button type="button" id="forgot-btn" class="btn-ghost w-full text-xs text-cream/40">رمزم را فراموش کرده‌ام — با کد یکبارمصرف وارد شوم</button>
-      </form>
+        <!-- step indicator -->
+        <div id="login-steps" class="mt-6 flex gap-1.5">
+          <div data-step="0" class="step-seg on"></div>
+          <div data-step="1" class="step-seg"></div>
+          <div data-step="2" class="step-seg"></div>
+        </div>
 
-      <!-- step 2b: one-time code -->
-      <form id="otp-form" class="mt-6 space-y-3 hidden">
-        <p class="text-xs leading-5 text-cream/45">کد ۶ رقمی به <span id="otp-email" class="text-gold"></span> ارسال شد<br><span class="text-cream/30">(۲ دقیقه اعتبار دارد)</span></p>
-        <input id="login-code" inputmode="numeric" maxlength="6" dir="ltr" placeholder="······" class="input text-center font-mono text-2xl tracking-[0.45em]" />
-        <button type="submit" class="btn-primary w-full">تأیید کد</button>
-        <button type="button" id="resend-btn" class="btn-ghost w-full text-xs text-cream/40" disabled>ارسال مجدد تا ۲:۰۰</button>
-      </form>
+        <!-- step 1: email -->
+        <form id="login-form" class="mt-6 space-y-3" novalidate>
+          <label class="block">
+            <span class="field-label">ایمیل سازمانی یا شخصی</span>
+            <div class="relative">
+              <input id="login-email" type="email" autocomplete="email" placeholder="you@example.com" dir="ltr" class="input pl-11 text-left" />
+              <span id="email-check" class="absolute inset-y-0 left-3 flex items-center text-base"></span>
+            </div>
+            <p id="email-hint" class="mt-1.5 hidden text-[11px] text-rose-300"></p>
+          </label>
+          <button type="submit" id="email-btn" class="btn-primary w-full">ادامه</button>
+        </form>
 
-      <!-- step 3: set password -->
-      <form id="newpass-form" class="mt-6 space-y-3 hidden">
-        <p class="text-xs text-cream/45">کد تأیید شد ✅ — برای حسابت رمز عبور تعیین کن<br><span class="text-cream/30">(دفعات بعد با همین رمز وارد می‌شوی)</span></p>
-        <input id="newpass" type="password" required autocomplete="new-password" placeholder="رمز عبور (حداقل ۸ کاراکتر)" class="input text-center" />
-        <input id="newpass2" type="password" required autocomplete="new-password" placeholder="تکرار رمز عبور" class="input text-center" />
-        <button type="submit" class="btn-primary w-full">ذخیره و ورود</button>
-      </form>
+        <!-- step 2a: password (returning user) -->
+        <form id="password-form" class="mt-6 space-y-3 hidden" novalidate>
+          <p class="text-xs leading-5 text-cream/50">حسابت شناخته شد 👋 رمز عبورت را وارد کن</p>
+          <label class="block">
+            <span class="field-label">رمز عبور</span>
+            <div class="relative">
+              <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••" class="input pl-11" />
+              <button type="button" data-eye="login-password" class="absolute inset-y-0 left-2 my-auto flex h-7 w-7 items-center justify-center rounded-lg text-cream/40 transition hover:text-cream">
+                <span class="ms text-xl">visibility</span>
+              </button>
+            </div>
+          </label>
+          <button type="submit" id="password-btn" class="btn-primary w-full">ورود</button>
+          <button type="button" id="forgot-btn" class="btn-ghost w-full text-xs text-cream/40">رمزم را فراموش کرده‌ام — با کد یکبارمصرف وارد شوم</button>
+        </form>
 
-      <p id="login-error" class="mt-4 hidden rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-300"></p>
+        <!-- step 2b: one-time code -->
+        <form id="otp-form" class="mt-6 space-y-4 hidden" novalidate>
+          <p class="text-center text-xs leading-5 text-cream/50">کد ۶ رقمی به <span id="otp-email" class="font-medium text-cyan"></span> ارسال شد<br><span class="text-cream/30">۲ دقیقه اعتبار دارد</span></p>
+          <div id="otp-boxes" dir="ltr" class="flex justify-center gap-2"></div>
+          <p id="otp-hint" class="hidden text-center text-[11px] text-rose-300"></p>
+          <button type="submit" id="otp-btn" class="btn-primary w-full">تأیید کد</button>
+          <button type="button" id="resend-btn" class="btn-ghost w-full text-xs text-cream/40" disabled>ارسال مجدد تا ۲:۰۰</button>
+        </form>
+
+        <!-- step 3: set password -->
+        <form id="newpass-form" class="mt-6 space-y-3 hidden" novalidate>
+          <p class="text-center text-xs leading-5 text-cream/50">کد تأیید شد ✅ برای حسابت رمز تعیین کن<br><span class="text-cream/30">دفعات بعد با همین رمز وارد می‌شوی</span></p>
+          <label class="block">
+            <span class="field-label">رمز عبور جدید</span>
+            <div class="relative">
+              <input id="newpass" type="password" autocomplete="new-password" placeholder="••••••••" class="input pl-11" />
+              <button type="button" data-eye="newpass" class="absolute inset-y-0 left-2 my-auto flex h-7 w-7 items-center justify-center rounded-lg text-cream/40 transition hover:text-cream">
+                <span class="ms text-xl">visibility</span>
+              </button>
+            </div>
+            <!-- strength meter -->
+            <div class="mt-2 flex gap-1">
+              <div class="h-1 flex-1 rounded-full bg-white/10 transition-colors" data-str="1"></div>
+              <div class="h-1 flex-1 rounded-full bg-white/10 transition-colors" data-str="2"></div>
+              <div class="h-1 flex-1 rounded-full bg-white/10 transition-colors" data-str="3"></div>
+              <div class="h-1 flex-1 rounded-full bg-white/10 transition-colors" data-str="4"></div>
+            </div>
+            <p id="str-label" class="mt-1 text-[10px] text-cream/40"></p>
+          </label>
+          <label class="block">
+            <span class="field-label">تکرار رمز عبور</span>
+            <input id="newpass2" type="password" autocomplete="new-password" placeholder="••••••••" class="input" />
+            <p id="match-hint" class="mt-1.5 hidden text-[11px] text-rose-300"></p>
+          </label>
+          <button type="submit" id="newpass-btn" class="btn-primary w-full">ذخیره و ورود</button>
+        </form>
+
+        <p id="login-error" class="mt-4 hidden rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-center text-xs text-rose-300"></p>
+      </div>
     </div>
   </section>
 
   <!-- ═══════════════ App ═══════════════ -->
   <section id="app-view" class="hidden h-screen flex-col">
     <header class="glass flex h-14 shrink-0 items-center justify-between border-x-0 border-t-0 px-4">
-      <div class="flex items-center gap-2">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-b from-gold to-gold/80 text-ink shadow shadow-gold/25">🤝</div>
-        <span class="font-bold text-vanilla">همکار</span>
+      <div class="flex items-center gap-2.5">
+        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-cyan shadow shadow-accent/40">🤝</div>
+        <span class="font-extrabold text-vanilla">همکار</span>
+        <span class="chip bg-white/5 text-cream/40">فضای کاری</span>
       </div>
-      <div class="flex items-center gap-3">
-        <button id="header-user-btn" class="flex items-center gap-2 rounded-xl px-2 py-1.5 text-xs text-cream/70 transition hover:bg-white/10 hover:text-cream" title="پروفایل">
+      <div class="flex items-center gap-2">
+        <button id="header-user-btn" class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-xs text-cream/80 transition hover:border-accent/40 hover:bg-white/[0.08]" title="پروفایل">
           <span id="header-user"></span>
         </button>
-        <button id="logout-btn" class="btn-ghost text-rose-300/80 hover:bg-rose-500/10 hover:text-rose-300" title="خروج"><span class="ms">logout</span></button>
+        <button id="logout-btn" class="btn-ghost text-cream/40 hover:bg-rose-500/10 hover:text-rose-300" title="خروج"><span class="ms">logout</span></button>
       </div>
     </header>
 
     <div class="flex min-h-0 flex-1">
-      <aside class="flex w-64 shrink-0 flex-col gap-4 overflow-y-auto border-l border-white/10 bg-navy/30 p-3 backdrop-blur-2xl">
+      <aside class="flex w-64 shrink-0 flex-col gap-5 overflow-y-auto border-l border-white/[0.07] bg-white/[0.02] p-3 backdrop-blur-2xl">
         <section>
-          <div class="mb-1 flex items-center justify-between px-1">
-            <h2 class="text-xs font-bold tracking-wide text-cream/35">تیم‌ها</h2>
-            <button id="new-team-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-gold hover:text-vanilla" title="تیم جدید">+</button>
+          <div class="mb-1.5 flex items-center justify-between px-1">
+            <h2 class="flex items-center gap-1 text-[11px] font-bold tracking-wide text-cream/35"><span class="ms text-sm">groups</span> تیم‌ها</h2>
+            <button id="new-team-btn" class="btn-ghost h-6 w-6 px-0 text-cream/40 hover:text-cyan" title="تیم جدید"><span class="ms text-lg">add</span></button>
           </div>
           <div id="teams-list" class="space-y-0.5"></div>
-          <button id="join-team-btn" class="mt-1 w-full rounded-xl px-2 py-1.5 text-right text-xs text-cream/35 transition hover:bg-white/5 hover:text-gold">+ عضویت با کد دعوت</button>
+          <button id="join-team-btn" class="mt-1 flex w-full items-center gap-1.5 rounded-xl px-2 py-1.5 text-right text-xs text-cream/35 transition hover:bg-white/[0.05] hover:text-cyan">
+            <span class="ms text-sm">key</span> عضویت با کد دعوت
+          </button>
         </section>
 
         <section>
-          <div class="mb-1 flex items-center justify-between px-1">
-            <h2 class="text-xs font-bold tracking-wide text-cream/35">پروژه‌ها</h2>
-            <button id="new-project-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-gold hover:text-vanilla" title="پروژه جدید">+</button>
+          <div class="mb-1.5 flex items-center justify-between px-1">
+            <h2 class="flex items-center gap-1 text-[11px] font-bold tracking-wide text-cream/35"><span class="ms text-sm">folder_open</span> پروژه‌ها</h2>
+            <button id="new-project-btn" class="btn-ghost h-6 w-6 px-0 text-cream/40 hover:text-cyan" title="پروژه جدید"><span class="ms text-lg">add</span></button>
           </div>
           <div id="projects-list" class="space-y-0.5"></div>
         </section>
 
         <section id="invites-box" class="hidden">
-          <h2 class="mb-1 px-1 text-xs font-bold tracking-wide text-cream/35">دعوت‌نامه‌ها</h2>
+          <h2 class="mb-1.5 px-1 text-[11px] font-bold tracking-wide text-cream/35">دعوت‌نامه‌ها</h2>
           <div id="invites-list" class="space-y-1"></div>
         </section>
       </aside>
@@ -101,7 +153,7 @@
   </section>
 
   <!-- generic modal -->
-  <dialog id="modal" class="w-80 rounded-2xl border border-white/10 bg-navy/80 p-6 text-cream shadow-2xl shadow-ink/60 backdrop-blur-2xl">
+  <dialog id="modal" class="w-80 rounded-2xl border border-white/10 bg-navy/90 p-6 text-cream shadow-2xl shadow-black/60 backdrop-blur-2xl">
     <h3 id="modal-title" class="mb-3 font-bold text-vanilla"></h3>
     <form id="modal-form" class="space-y-3"></form>
   </dialog>

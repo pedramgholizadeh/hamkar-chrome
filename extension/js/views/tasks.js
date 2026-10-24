@@ -145,7 +145,7 @@ const Tasks = {
     bar.innerHTML = `<span class="text-[10px] text-cream/35">فیلتر فاز:</span>` + [{
       id: '', title: 'همه',
     }].concat(phases).map((p) => `
-      <button data-filter="${p.id}" class="chip ${String(Tasks.phaseFilter) === String(p.id) ? 'bg-gold/20 text-gold' : 'bg-white/5 text-cream/50 hover:bg-white/10'}">${Util.esc(p.title)}</button>`).join('');
+      <button data-filter="${p.id}" class="chip ${String(Tasks.phaseFilter) === String(p.id) ? 'bg-accent/20 text-accent' : 'bg-white/5 text-cream/50 hover:bg-white/10'}">${Util.esc(p.title)}</button>`).join('');
     bar.querySelectorAll('[data-filter]').forEach((btn) =>
       btn.addEventListener('click', () => {
         Tasks.phaseFilter = btn.dataset.filter;
@@ -161,7 +161,7 @@ const Tasks = {
 
     return `
       <div class="card flex items-start gap-3 px-4 py-3 transition ${t.done ? 'opacity-55' : ''}">
-        <input type="checkbox" data-toggle="${t.id}" ${t.done ? 'checked' : ''} class="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-gold" />
+        <input type="checkbox" data-toggle="${t.id}" ${t.done ? 'checked' : ''} class="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-accent" />
         <div class="min-w-0 flex-1">
           <p class="text-sm font-medium ${t.done ? 'text-cream/40 line-through' : ''}">${Util.esc(t.title)}</p>
           <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-cream/40">

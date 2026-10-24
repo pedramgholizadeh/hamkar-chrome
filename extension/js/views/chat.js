@@ -112,9 +112,9 @@ const Chat = {
     }
     bar.classList.remove('hidden');
     bar.innerHTML = `
-      <div class="flex items-center gap-2 rounded-xl border-e-2 border-gold bg-white/5 px-3 py-1.5">
+      <div class="flex items-center gap-2 rounded-xl border-e-2 border-accent bg-white/5 px-3 py-1.5">
         <div class="min-w-0 flex-1">
-          <p class="text-[10px] font-bold text-gold">پاسخ به ${Util.esc(msg.user.display_name)}</p>
+          <p class="text-[10px] font-bold text-accent">پاسخ به ${Util.esc(msg.user.display_name)}</p>
           <p class="truncate text-xs text-cream/50">${Util.esc(msg.body || '📎 فایل پیوست')}</p>
         </div>
         <button id="reply-cancel" class="btn-ghost h-6 px-1">${Util.icon('close', 'text-sm')}</button>
@@ -206,18 +206,18 @@ const Chat = {
     }
 
     const bubbleCls = mine
-      ? 'bg-gradient-to-b from-gold to-gold/85 text-ink shadow-lg shadow-gold/10'
+      ? 'bg-gradient-to-b from-accent to-accent/85 text-ink shadow-lg shadow-accent/10'
       : 'glass text-cream';
     const tailCls = mine ? 'rounded-2xl rounded-bl-md' : 'rounded-2xl rounded-br-md';
 
     const replyHtml = m.reply_to ? `
-      <div class="mb-1.5 border-e-2 ${mine ? 'border-ink/50' : 'border-gold/60'} bg-black/10 rounded-lg px-2.5 py-1">
-        <p class="text-[10px] font-bold ${mine ? 'text-ink/70' : 'text-gold'}">${Util.esc(m.reply_to.author)}</p>
+      <div class="mb-1.5 border-e-2 ${mine ? 'border-ink/50' : 'border-accent/60'} bg-black/10 rounded-lg px-2.5 py-1">
+        <p class="text-[10px] font-bold ${mine ? 'text-ink/70' : 'text-accent'}">${Util.esc(m.reply_to.author)}</p>
         <p class="truncate text-[11px] ${mine ? 'text-ink/60' : 'text-cream/50'}">${Util.esc(m.reply_to.body || '📎 فایل پیوست')}</p>
       </div>` : '';
 
     const headHtml = (!mine && !grouped) ? `
-      <p class="mb-0.5 px-1 text-[11px] font-bold text-gold">${Util.esc(m.user.display_name)}</p>` : '';
+      <p class="mb-0.5 px-1 text-[11px] font-bold text-accent">${Util.esc(m.user.display_name)}</p>` : '';
 
     const metaTime = Util.timeFa(m.created_at);
     const avatarSlot = `

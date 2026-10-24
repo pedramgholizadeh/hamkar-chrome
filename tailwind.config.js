@@ -1,21 +1,21 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./extension/newtab.html', './extension/js/**/*.js', './landing/index.html'],
+  content: ['./extension/newtab.html', './extension/js/**/*.js'],
   theme: {
     extend: {
       colors: {
-        // Hamkar palette
-        ink: '#030164',     // deep night — base background
-        cream: '#FCF9EA',   // primary text
-        vanilla: '#FFFAD3', // secondary text / highlights
-        navy: '#253C6D',    // glass panel tint
-        steel: '#455B8A',   // muted borders / hover
-        gold: '#FCAD38',    // accent
-        sand: '#FFFAD3',    // alias of vanilla (landing)
-        slate2: '#455B8A',  // alias of steel (landing)
+        // Modern SaaS dark palette
+        ink: '#07080F',      // page background — near-black blue
+        navy: '#151A2C',     // glass panel tint base
+        steel: '#2B3143',    // lines / hover surfaces
+        cream: '#E9EBF4',    // body text
+        vanilla: '#FFFFFF',  // headings
+        accent: '#8B5CF6',   // primary — violet
+        cyan: '#22D3EE',     // secondary accent — gradients
+        mint: '#34D399',     // success
       },
       fontFamily: {
-        vazir: ['Vazirmatn', 'sans-serif'],
+        sans: ['Vazirmatn', 'Segoe UI', 'Tahoma', 'sans-serif'],
       },
     },
   },

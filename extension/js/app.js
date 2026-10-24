@@ -52,12 +52,27 @@ const App = {
   },
 
   renderEmptyMain() {
+    const action = (id, icon, title, sub, cls) => `
+      <button id="${id}" class="panel col-span-2 flex flex-col items-start gap-2 p-5 text-right transition hover:border-accent/40">
+        <div class="flex h-11 w-11 items-center justify-center rounded-2xl ${cls}">${Util.icon(icon, 'ms-fill text-2xl text-white')}</div>
+        <p class="text-sm font-bold text-vanilla">${title}</p>
+        <p class="text-[11px] leading-5 text-cream/40">${sub}</p>
+      </button>`;
     Util.byId('main').innerHTML = `
-      <div class="flex h-full flex-col items-center justify-center gap-2 text-cream/40">
-        <div class="text-5xl">👋</div>
-        <p class="font-medium text-cream/60">از منوی کنار یک پروژه یا تیم را انتخاب کن</p>
-        <p class="text-xs">یا با دکمه‌های + تیم و پروژه‌ی جدید بساز</p>
+      <div class="flex h-full flex-col items-center justify-center p-8">
+        <div class="w-full max-w-md">
+          <p class="mb-4 text-center text-sm text-cream/50">👋 خوش آمدی — از کجا شروع کنیم؟</p>
+          <div class="grid grid-cols-6 gap-3">
+            ${action('qa-team', 'group_add', 'تیم جدید بساز', 'همکارانت را دور هم جمع کن', 'bg-gradient-to-br from-accent to-accent/60')}
+            ${action('qa-project', 'rocket_launch', 'پروژه‌ی جدید', 'کارها را فازبندی و پیگیری کن', 'bg-gradient-to-br from-cyan to-cyan/50')}
+            ${action('qa-join', 'key', 'عضویت با کد', 'با کد دعوت به تیم بپیوند', 'bg-gradient-to-br from-fuchsia-500 to-fuchsia-500/50')}
+          </div>
+        </div>
       </div>`;
+
+    Util.byId('qa-team').addEventListener('click', () => Util.byId('new-team-btn').click());
+    Util.byId('qa-project').addEventListener('click', () => Util.byId('new-project-btn').click());
+    Util.byId('qa-join').addEventListener('click', () => Util.byId('join-team-btn').click());
   },
 
   async loadInvites() {
@@ -71,9 +86,9 @@ const App = {
       }
       box.classList.remove('hidden');
       list.innerHTML = data.invites.map((i) => `
-        <div class="flex items-center gap-1 rounded-xl border border-gold/20 bg-gold/10 p-2 text-xs">
+        <div class="flex items-center gap-1 rounded-xl border border-accent/20 bg-accent/10 p-2 text-xs">
           <div class="min-w-0 flex-1">
-            <p class="truncate font-medium text-gold">${Util.esc(i.team_name)}</p>
+            <p class="truncate font-medium text-accent">${Util.esc(i.team_name)}</p>
             <p class="text-[10px] text-cream/40">تو را دعوت کرده</p>
           </div>
           <button data-accept="${i.id}" class="btn-primary shrink-0 px-2 py-1 text-[11px]">پذیرش</button>

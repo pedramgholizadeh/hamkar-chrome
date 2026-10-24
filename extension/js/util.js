@@ -97,7 +97,7 @@ const Util = {
 
   /** Colored initials avatar or the user's uploaded image. */
   async avatarHtml(user, size = 'h-9 w-9 text-sm') {
-    const colors = ['bg-gold/20 text-gold', 'bg-emerald-500/20 text-emerald-300', 'bg-sky-500/20 text-sky-300', 'bg-rose-500/20 text-rose-300', 'bg-violet-500/20 text-violet-300'];
+    const colors = ['bg-accent/20 text-accent', 'bg-emerald-500/20 text-emerald-300', 'bg-sky-500/20 text-sky-300', 'bg-rose-500/20 text-rose-300', 'bg-violet-500/20 text-violet-300'];
     const hue = colors[((user && user.id) || 0) % colors.length];
     if (user && user.avatar_file_id) {
       const url = await MediaStore.url(user.avatar_file_id);

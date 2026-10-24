@@ -55,9 +55,12 @@ mirror -R ${DRY_RUN_FLAG} --delete --verbose \
   --exclude-glob *.md \
   "$ROOT/server" "$FTP_REMOTE_DIR"
 
-mirror -R ${DRY_RUN_FLAG} --delete --verbose \
+# landing/ → ریشه‌ی پروژه (کنار api/) تا https://apps.webiro.ir/hamkar/ لندینگ باشد
+# ⚠️ بدون --delete: ریشه‌ی مقصد با server/ مشترک است و پاک‌سازی حذفش می‌کرد (api/، media/، …)
+mirror -R ${DRY_RUN_FLAG} --verbose \
+  --exclude ^src\.css$ \
   --exclude-glob .DS_Store \
-  "$ROOT/landing" "${FTP_REMOTE_DIR%/}/landing"
+  "$ROOT/landing" "$FTP_REMOTE_DIR"
 bye
 EOF
 

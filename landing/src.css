@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- فونت‌های لوکال (بدون CDN) ---------- */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('fonts/Vazirmatn-var.woff2') format('woff2 supports variations'),
+       url('fonts/Vazirmatn-var.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 100 700;
+  src: url('fonts/MaterialSymbolsRounded.woff2') format('woff2');
+  font-display: block;
+}
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   Hamkar landing — Liquid Glass helpers on top of Tailwind
+   Palette: #030164 / #253C6D / #455B8A / #FCAD38 / #FCF9EA / #FFFAD3
+   ============================================================ */
+
+html { scroll-behavior: smooth; }
+
+::selection { background: #fcad38; color: #030164; }
+
+/* اسکرول‌بار مینیمال */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #253c6d; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #455b8a; }
+
+/* ---------- بلاب‌های پس‌زمینه ---------- */
+.blobs {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+}
+.blob {
+  position: absolute; border-radius: 9999px; filter: blur(90px); opacity: .55;
+  will-change: transform;
+}
+.blob-1 {
+  width: 480px; height: 480px; top: -140px; right: -120px;
+  background: radial-gradient(circle, #253c6d 0%, transparent 70%);
+  animation: drift1 18s ease-in-out infinite alternate;
+}
+.blob-2 {
+  width: 420px; height: 420px; bottom: -120px; left: -100px;
+  background: radial-gradient(circle, #455b8a 0%, transparent 70%);
+  animation: drift2 22s ease-in-out infinite alternate;
+}
+.blob-3 {
+  width: 360px; height: 360px; top: 40%; left: 55%;
+  background: radial-gradient(circle, rgba(252,173,56,.28) 0%, transparent 70%);
+  animation: drift3 26s ease-in-out infinite alternate;
+}
+@keyframes drift1 { to { transform: translate(-60px, 80px) scale(1.1); } }
+@keyframes drift2 { to { transform: translate(70px, -60px) scale(1.15); } }
+@keyframes drift3 { to { transform: translate(-80px, -70px) scale(.9); } }
+
+.noise {
+  position: absolute; inset: 0; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- سطوح شیشه‌ای ---------- */
+.glass {
+  background: linear-gradient(160deg, rgba(252,249,234,.07), rgba(37,60,109,.14));
+  border: 1px solid rgba(252,249,234,.10);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 12px 40px rgba(3,1,100,.45), inset 0 1px 0 rgba(252,249,234,.08);
+}
+.glass-pill {
+  background: linear-gradient(160deg, rgba(252,249,234,.08), rgba(37,60,109,.16));
+  border: 1px solid rgba(252,249,234,.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.glass-inner {
+  background: rgba(3,1,100,.35);
+  border: 1px solid rgba(252,249,234,.07);
+}
+
+.card { transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease; }
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(252,173,56,.45);
+  box-shadow: 0 16px 48px rgba(3,1,100,.6), 0 0 0 1px rgba(252,173,56,.15);
+}
+
+/* ---------- دکمه‌ها ---------- */
+.btn-gold {
+  background: linear-gradient(135deg, #fcad38, #fffad3);
+  color: #030164; font-weight: 800;
+  box-shadow: 0 8px 28px rgba(252,173,56,.35);
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.btn-gold:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 12px 36px rgba(252,173,56,.5); }
+
+.btn-ghost {
+  background: rgba(252,249,234,.05);
+  border: 1px solid rgba(252,249,234,.16);
+  color: #fcf9ea; font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.btn-ghost:hover { background: rgba(252,249,234,.1); border-color: rgba(252,173,56,.5); transform: translateY(-2px); }
+
+/* ---------- شماره‌ی مراحل ---------- */
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 9999px;
+  background: rgba(252,173,56,.14); border: 1px solid rgba(252,173,56,.45);
+  color: #fcad38; font-weight: 800;
+}
+
+/* ---------- ریویل هنگام اسکرول ---------- */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.is-visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .blob, .blob-1, .blob-2, .blob-3 { animation: none; }
+  html { scroll-behavior: auto; }
+}

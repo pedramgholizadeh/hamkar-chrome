@@ -20,7 +20,7 @@
   }
 
   // نمایش نسخه‌ی آخرین ریلیز روی دکمه‌های دانلود (اگر گیت‌هاب جواب داد)
-  var DL_URL = 'https://github.com/pedramgholizadeh/hamkar-chrome/releases/latest/download/hamkar-extension-latest.zip';
+  var DL_URL = 'https://github.com/pedramgholizadeh/hamkar-chrome/releases/download/latest/hamkar-extension-latest.zip';
   document.querySelectorAll('#dl-hero, #dl-cta').forEach(function (a) {
     a.setAttribute('href', DL_URL);
   });

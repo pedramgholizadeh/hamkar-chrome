@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./extension/newtab.html', './extension/js/**/*.js'],
+  content: ['./extension/newtab.html', './extension/js/**/*.js', './landing/index.html'],
   theme: {
     extend: {
       colors: {
@@ -11,6 +11,11 @@ module.exports = {
         navy: '#253C6D',    // glass panel tint
         steel: '#455B8A',   // muted borders / hover
         gold: '#FCAD38',    // accent
+        sand: '#FFFAD3',    // alias of vanilla (landing)
+        slate2: '#455B8A',  // alias of steel (landing)
+      },
+      fontFamily: {
+        vazir: ['Vazirmatn', 'sans-serif'],
       },
     },
   },

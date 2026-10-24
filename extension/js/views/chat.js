@@ -21,8 +21,8 @@ const Chat = {
 
     Util.byId('panel').innerHTML = `
       <div class="flex h-full flex-col">
-        <div id="chat-messages" class="min-h-0 flex-1 space-y-2 overflow-y-auto bg-slate-100/60 p-4"></div>
-        <form id="chat-form" class="flex shrink-0 items-end gap-2 border-t border-slate-200 bg-white p-3">
+        <div id="chat-messages" class="min-h-0 flex-1 space-y-2 overflow-y-auto p-4"></div>
+        <form id="chat-form" class="flex shrink-0 items-end gap-2 border-t border-white/10 bg-navy/40 p-3 backdrop-blur-2xl">
           <input type="file" id="chat-file" class="hidden" />
           <button type="button" id="chat-attach" class="btn-ghost text-xl" title="پیوست فایل">📎</button>
           <textarea id="chat-input" rows="1" placeholder="پیام…" class="input max-h-32 min-h-[42px] flex-1 resize-none py-2.5"></textarea>
@@ -96,9 +96,9 @@ const Chat = {
 
     if (initial && !data.messages.length) {
       box.innerHTML = `
-        <div class="flex h-full flex-col items-center justify-center gap-2 text-slate-400">
+        <div class="flex h-full flex-col items-center justify-center gap-2 text-cream/40">
           <div class="text-4xl">💬</div>
-          <p class="text-sm font-medium text-slate-500">اولین پیام را بفرست!</p>
+          <p class="text-sm font-medium text-cream/60">اولین پیام را بفرست!</p>
           <p class="text-xs">می‌توانی متن، عکس یا فایل بفرستی</p>
         </div>`;
       return;
@@ -130,7 +130,7 @@ const Chat = {
         }
         img.src = Chat.mediaUrls.get(fileId);
       } catch {
-        img.outerHTML = '<div class="rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-500">پیش‌نمایش عکس ممکن نشد</div>';
+        img.outerHTML = '<div class="rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">پیش‌نمایش عکس ممکن نشد</div>';
       }
     });
   },
@@ -143,13 +143,13 @@ const Chat = {
     let content = '';
     if (m.file) {
       if (String(m.file.mime).startsWith('image/')) {
-        content += `<img data-file="${m.file.id}" alt="${Util.esc(m.file.name)}" class="mb-1.5 max-h-64 max-w-full cursor-pointer rounded-xl bg-slate-200" />`;
+        content += `<img data-file="${m.file.id}" alt="${Util.esc(m.file.name)}" class="mb-1.5 max-h-64 max-w-full cursor-pointer rounded-xl bg-white/10" />`;
       } else {
         content += `
-          <a href="#" data-download="${m.file.id}" data-name="${Util.esc(m.file.name)}" class="mb-1.5 flex items-center gap-2 rounded-xl px-3 py-2 text-xs transition ${mine ? 'bg-white/15 hover:bg-white/25' : 'bg-slate-100 hover:bg-slate-200'}">
+          <a href="#" data-download="${m.file.id}" data-name="${Util.esc(m.file.name)}" class="mb-1.5 flex items-center gap-2 rounded-xl px-3 py-2 text-xs transition ${mine ? 'bg-ink/15 hover:bg-ink/25' : 'bg-white/10 hover:bg-white/20'}">
             <span class="text-lg">📄</span>
             <span class="min-w-0 flex-1 truncate font-medium">${Util.esc(m.file.name)}</span>
-            <span class="${mine ? 'text-white/70' : 'text-slate-400'}">${Util.bytes(m.file.size)}</span>
+            <span class="${mine ? 'text-ink/60' : 'text-cream/40'}">${Util.bytes(m.file.size)}</span>
           </a>`;
       }
     }
@@ -158,14 +158,14 @@ const Chat = {
     }
 
     const bubbleCls = mine
-      ? 'bg-indigo-600 text-white'
-      : 'border border-slate-200 bg-white text-slate-800';
+      ? 'bg-gradient-to-b from-gold to-gold/85 text-ink shadow-lg shadow-gold/10'
+      : 'glass text-cream';
     const tailCls = mine ? 'rounded-2xl rounded-bl-md' : 'rounded-2xl rounded-br-md';
 
     return `
       <div class="max-w-[75%] ${mine ? 'ms-auto' : 'me-auto'}">
-        <div class="${bubbleCls} ${tailCls} px-3.5 py-2.5 shadow-sm">${content}</div>
-        <p class="mt-1 px-1 text-[10px] text-slate-400 ${mine ? 'text-left' : 'text-right'}">${Util.esc(who)} · ${time}</p>
+        <div class="${bubbleCls} ${tailCls} px-3.5 py-2.5">${content}</div>
+        <p class="mt-1 px-1 text-[10px] text-cream/40 ${mine ? 'text-left' : 'text-right'}">${Util.esc(who)} · ${time}</p>
       </div>`;
   },
 };

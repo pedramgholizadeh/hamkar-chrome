@@ -41,7 +41,7 @@ hamkar-chrome/
 1. محتوای پوشه‌ی `server/` را روی مسیر `apps.webiro.ir/hamkar` آپلود کنید (یا با `scripts/sync-ftp.sh`).
 2. `server/api/config.example.php` را به `config.php` تغییر نام دهید و اطلاعات دیتابیس MySQL و کلید API سرویس Resend را در آن بنویسید.
 3. یک‌بار آدرس `https://apps.webiro.ir/hamkar/api/install.php` را در مرورگر باز کنید تا جداول ساخته شوند.
-4. برای اطمینان از سلامت، `https://apps.webiro.ir/hamkar/api/index.php` باید JSON سلامت برگرداند.
+4. برای اطمینان از سلامت، `https://apps.webiro.ir/hamkar/api/` باید JSON سلامت برگرداند: `{"ok":true,"service":"hamkar-api"}`
 
 جزئیات کامل در [docs/DEPLOY.md](docs/DEPLOY.md).
 

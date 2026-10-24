@@ -178,18 +178,18 @@ if (!is_file($htaccess)) {
 }
 
 echo '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>همکار — نصب</title></head>';
-echo '<body style="font-family:Tahoma,sans-serif;background:#f1f5f9;padding:40px">';
-echo '<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:32px">';
-echo '<h1 style="color:#4f46e5;margin-top:0">🤝 نصب همکار</h1><ul style="line-height:2.2">';
+echo '<body style="font-family:Tahoma,sans-serif;background:linear-gradient(135deg,#030164,#253C6D);padding:40px;color:#FCF9EA">';
+echo '<div style="max-width:520px;margin:0 auto;background:rgba(37,60,109,.55);border:1px solid rgba(255,250,211,.14);border-radius:20px;padding:32px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)">';
+echo '<h1 style="color:#FCAD38;margin-top:0">🤝 نصب همکار</h1><ul style="line-height:2.2">';
 foreach ($results as [$name, $ok, $err]) {
     echo $ok
         ? "<li>✅ جدول <code>{$name}</code> آماده است</li>"
-        : "<li style='color:#e11d48'>❌ جدول <code>{$name}</code>: " . htmlspecialchars($err, ENT_QUOTES) . '</li>';
+        : "<li style='color:#fb7185'>❌ جدول <code>{$name}</code>: " . htmlspecialchars($err, ENT_QUOTES) . '</li>';
 }
 echo '</ul>';
 $allOk = !in_array(false, array_column($results, 1), true);
 echo $allOk
-    ? '<p style="color:#059669"><b>همه‌چیز آماده است!</b> حالا اکستنشن را از پوشه‌ی <code>extension/</code> در کروم نصب کن.</p>'
-    : '<p style="color:#e11d48">یک یا چند جدول ساخته نشد — دسترسی‌های کاربر دیتابیس را چک کن.</p>';
+    ? '<p style="color:#FCAD38"><b>همه‌چیز آماده است!</b> حالا اکستنشن را از پوشه‌ی <code>extension/</code> در کروم نصب کن.</p>'
+    : '<p style="color:#fb7185">یک یا چند جدول ساخته نشد — دسترسی‌های کاربر دیتابیس را چک کن.</p>';
 echo '<p style="color:#94a3b8;font-size:12px">این فایل idempotent است و می‌توانی بعد از نصب آن را حذف کنی.</p>';
 echo '</div></body></html>';

@@ -43,17 +43,17 @@ const App = {
 
   renderEmptyMain() {
     Util.byId('main').innerHTML = `
-      <div class="flex h-full flex-col items-center justify-center gap-2 text-slate-400">
+      <div class="flex h-full flex-col items-center justify-center gap-2 text-cream/40">
         <div class="text-5xl">👋</div>
-        <p class="font-medium text-slate-500">از منوی کنار یک پروژه را انتخاب کن</p>
+        <p class="font-medium text-cream/60">از منوی کنار یک پروژه را انتخاب کن</p>
         <p class="text-xs">یا با دکمه‌های + تیم و پروژه‌ی جدید بساز</p>
       </div>`;
   },
 
   setTab(tab) {
     App.state.tab = tab;
-    const active = 'rounded-lg bg-white px-4 py-1.5 font-medium text-indigo-600 shadow transition';
-    const inactive = 'rounded-lg px-4 py-1.5 text-slate-500 transition';
+    const active = 'rounded-lg bg-gradient-to-b from-gold to-gold/85 px-4 py-1.5 font-semibold text-ink shadow transition';
+    const inactive = 'rounded-lg px-4 py-1.5 text-cream/50 transition hover:text-cream';
     Util.byId('tab-chat').className = tab === 'chat' ? active : inactive;
     Util.byId('tab-tasks').className = tab === 'tasks' ? active : inactive;
 
@@ -73,10 +73,10 @@ const App = {
       }
       box.classList.remove('hidden');
       list.innerHTML = data.invites.map((i) => `
-        <div class="flex items-center gap-1 rounded-xl bg-amber-50 p-2 text-xs">
+        <div class="flex items-center gap-1 rounded-xl border border-gold/20 bg-gold/10 p-2 text-xs">
           <div class="min-w-0 flex-1">
-            <p class="truncate font-medium text-amber-800">${Util.esc(i.team_name)}</p>
-            <p class="text-[10px] text-amber-600">تو را دعوت کرده</p>
+            <p class="truncate font-medium text-gold">${Util.esc(i.team_name)}</p>
+            <p class="text-[10px] text-cream/40">تو را دعوت کرده</p>
           </div>
           <button data-accept="${i.id}" class="btn-primary shrink-0 px-2 py-1 text-[11px]">پذیرش</button>
         </div>`).join('');
@@ -98,8 +98,8 @@ const App = {
 
   toast(message, isError = true) {
     const el = document.createElement('div');
-    el.className = 'fixed bottom-4 left-4 z-50 rounded-xl px-4 py-2 text-sm text-white shadow-lg '
-      + (isError ? 'bg-rose-600' : 'bg-slate-900');
+    el.className = 'fixed bottom-4 left-4 z-50 rounded-xl border px-4 py-2 text-sm shadow-lg backdrop-blur-xl '
+      + (isError ? 'border-rose-400/20 bg-rose-500/90 text-white' : 'border-white/10 bg-navy/90 text-vanilla');
     el.textContent = message;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3500);
@@ -117,13 +117,13 @@ const App = {
           `<option value="${Util.esc(o.value)}">${Util.esc(o.label)}</option>`).join('');
         return `
           <label class="block">
-            <span class="mb-1 block text-xs text-slate-500">${Util.esc(f.label)}</span>
+            <span class="mb-1 block text-xs text-cream/45">${Util.esc(f.label)}</span>
             <select name="${Util.esc(f.name)}" class="input">${options}</select>
           </label>`;
       }
       return `
         <label class="block">
-          <span class="mb-1 block text-xs text-slate-500">${Util.esc(f.label)}</span>
+          <span class="mb-1 block text-xs text-cream/45">${Util.esc(f.label)}</span>
           <input name="${Util.esc(f.name)}" type="${f.type || 'text'}" required class="input" placeholder="${Util.esc(f.placeholder || '')}" />
         </label>`;
     }).join('') + `

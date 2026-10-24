@@ -115,11 +115,11 @@ final class AuthController
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head><meta charset="utf-8"><title>همکار — ورود</title></head>
-<body style="font-family:Tahoma,Arial,sans-serif;background:#f1f5f9;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0">
-  <div style="background:#fff;border-radius:16px;padding:40px 48px;text-align:center;max-width:420px;box-shadow:0 10px 30px rgba(0,0,0,.08)">
+<body style="font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#030164,#253C6D);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;color:#FCF9EA">
+  <div style="background:rgba(37,60,109,.55);border:1px solid rgba(255,250,211,.14);border-radius:20px;padding:44px 52px;text-align:center;max-width:420px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 60px rgba(0,0,0,.35)">
     <div style="font-size:40px">🤝</div>
-    <h1 style="color:#4f46e5;margin:8px 0 12px">{$title}</h1>
-    <p style="color:#475569;line-height:1.9">{$message}</p>
+    <h1 style="color:#FCAD38;margin:8px 0 12px">{$title}</h1>
+    <p style="color:#FCF9EA;line-height:1.9;opacity:.9">{$message}</p>
   </div>
 </body>
 </html>

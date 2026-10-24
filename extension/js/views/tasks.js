@@ -65,7 +65,7 @@ const Tasks = {
 
     box.innerHTML = data.tasks.length
       ? data.tasks.map(Tasks.item).join('')
-      : '<div class="card p-6 text-center text-sm text-slate-400">هنوز تسکی نیست — اولین تسک را اضافه کن! ✨</div>';
+      : '<div class="card p-6 text-center text-sm text-cream/40">هنوز تسکی نیست — اولین تسک را اضافه کن! ✨</div>';
 
     box.querySelectorAll('[data-toggle]').forEach((cb) =>
       cb.addEventListener('change', async () => {
@@ -83,12 +83,12 @@ const Tasks = {
     const assignee = mine ? 'من' : (t.assignee_name || t.assignee_email || '—');
     return `
       <div class="card flex items-center gap-3 px-4 py-3 transition ${Number(t.done) ? 'opacity-60' : ''}">
-        <input type="checkbox" data-toggle="${t.id}" ${Number(t.done) ? 'checked' : ''} class="h-5 w-5 shrink-0 cursor-pointer accent-indigo-600" />
+        <input type="checkbox" data-toggle="${t.id}" ${Number(t.done) ? 'checked' : ''} class="h-5 w-5 shrink-0 cursor-pointer accent-gold" />
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium ${Number(t.done) ? 'text-slate-400 line-through' : ''}">${Util.esc(t.title)}</p>
-          <p class="text-[11px] text-slate-400">برای: ${Util.esc(assignee)} · توسط: ${Util.esc(t.creator_name || t.creator_email)}</p>
+          <p class="truncate text-sm font-medium ${Number(t.done) ? 'text-cream/40 line-through' : ''}">${Util.esc(t.title)}</p>
+          <p class="text-[11px] text-cream/40">برای: ${Util.esc(assignee)} · توسط: ${Util.esc(t.creator_name || t.creator_email)}</p>
         </div>
-        ${Number(t.done) ? '<span class="shrink-0 text-xs text-emerald-500">انجام شد ✓</span>' : ''}
+        ${Number(t.done) ? '<span class="shrink-0 text-xs text-emerald-400">انجام شد ✓</span>' : ''}
       </div>`;
   },
 };

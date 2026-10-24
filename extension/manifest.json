@@ -11,8 +11,11 @@
     "48": "assets/icons/icon48.png",
     "128": "assets/icons/icon128.png"
   },
-  "permissions": ["storage"],
-  "host_permissions": ["https://apps.webiro.ir/*"],
+  "permissions": ["storage", "clipboardWrite"],
+  "host_permissions": [
+    "https://apps.webiro.ir/*",
+    "http://apps.webiro.ir/*"
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   }

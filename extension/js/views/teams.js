@@ -10,13 +10,13 @@ const Teams = {
   renderList() {
     const box = Util.byId('teams-list');
     if (!App.state.teams.length) {
-      box.innerHTML = '<p class="px-2 py-1 text-xs text-slate-400">هنوز تیمی نداری</p>';
+      box.innerHTML = '<p class="px-2 py-1 text-xs text-cream/35">هنوز تیمی نداری</p>';
       return;
     }
     box.innerHTML = App.state.teams.map((t) => `
-      <button data-team="${t.id}" class="flex w-full items-center justify-between rounded-xl px-2 py-1.5 text-sm transition hover:bg-slate-100 ${App.state.currentTeam === t.id ? 'bg-indigo-50 font-medium text-indigo-700' : ''}">
+      <button data-team="${t.id}" class="flex w-full items-center justify-between rounded-xl px-2 py-1.5 text-sm transition hover:bg-white/5 ${App.state.currentTeam === t.id ? 'bg-gold/15 font-medium text-gold' : ''}">
         <span class="truncate">${Util.esc(t.name)}</span>
-        ${t.role === 'owner' ? '<span class="shrink-0 text-[10px] text-amber-500">👑</span>' : ''}
+        ${t.role === 'owner' ? '<span class="shrink-0 text-[10px]">👑</span>' : ''}
       </button>`).join('');
     box.querySelectorAll('[data-team]').forEach((btn) =>
       btn.addEventListener('click', () => Teams.open(Number(btn.dataset.team))));
@@ -42,23 +42,23 @@ const Teams = {
         <div class="mx-auto max-w-lg space-y-4">
           <div class="card p-5">
             <h1 class="text-lg font-bold">${Util.esc(data.team.name)}</h1>
-            <button id="team-copy-code" class="mt-2 flex w-full items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500 transition hover:bg-slate-100">
+            <button id="team-copy-code" class="mt-2 flex w-full items-center justify-between rounded-xl bg-white/5 px-3 py-2 text-xs text-cream/50 transition hover:bg-white/10">
               <span>کد دعوت (برای همکارانت بفرست)</span>
-              <span class="font-mono text-sm font-bold tracking-widest text-indigo-600">${Util.esc(data.team.invite_code)} 📋</span>
+              <span class="font-mono text-sm font-bold tracking-widest text-gold">${Util.esc(data.team.invite_code)} 📋</span>
             </button>
           </div>
 
           <div class="card p-5">
-            <h2 class="mb-3 text-sm font-bold">اعضا <span class="text-slate-400">(${data.members.length})</span></h2>
+            <h2 class="mb-3 text-sm font-bold text-vanilla">اعضا <span class="text-cream/40">(${data.members.length})</span></h2>
             <div class="space-y-2">
               ${data.members.map((m) => `
                 <div class="flex items-center gap-3">
-                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">${Util.esc((m.name || m.email).charAt(0).toUpperCase())}</div>
+                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/20 text-xs font-bold text-gold">${Util.esc((m.name || m.email).charAt(0).toUpperCase())}</div>
                   <div class="min-w-0 flex-1">
                     <p class="truncate text-sm font-medium">${Util.esc(m.name || m.email)}</p>
-                    ${m.name ? `<p class="truncate text-[11px] text-slate-400">${Util.esc(m.email)}</p>` : ''}
+                    ${m.name ? `<p class="truncate text-[11px] text-cream/40">${Util.esc(m.email)}</p>` : ''}
                   </div>
-                  <span class="text-[11px] text-slate-400">${m.role === 'owner' ? 'مالک' : 'عضو'}</span>
+                  <span class="text-[11px] text-cream/40">${m.role === 'owner' ? 'مالک' : 'عضو'}</span>
                 </div>`).join('')}
             </div>
             <form id="invite-form" class="mt-4 flex gap-2">

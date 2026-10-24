@@ -5,14 +5,22 @@
   <title>همکار</title>
   <link rel="stylesheet" href="assets/css/tailwind.css" />
 </head>
-<body class="h-screen overflow-hidden bg-slate-100 text-slate-800">
+<body class="h-screen overflow-hidden bg-ink text-cream">
+
+  <!-- ambient liquid-glass background -->
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-40 -right-32 h-[28rem] w-[28rem] rounded-full bg-navy/70 blur-3xl"></div>
+    <div class="absolute top-1/2 -left-32 h-96 w-96 rounded-full bg-gold/15 blur-3xl"></div>
+    <div class="absolute -bottom-40 right-1/3 h-[26rem] w-[26rem] rounded-full bg-steel/40 blur-3xl"></div>
+    <div class="absolute top-16 left-1/4 h-72 w-72 rounded-full bg-gold/10 blur-3xl"></div>
+  </div>
 
   <!-- ═══════════════ Login ═══════════════ -->
-  <section id="login-view" class="hidden h-screen items-center justify-center bg-gradient-to-br from-indigo-600 via-indigo-500 to-sky-500 p-6">
+  <section id="login-view" class="hidden h-screen items-center justify-center p-6">
     <div class="card w-full max-w-sm p-8 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-2xl text-white">🤝</div>
-      <h1 class="text-xl font-bold">همکار</h1>
-      <p class="mt-1 text-sm text-slate-500">فضای کاری تیمی، همان‌جا که تب جدیدت باز می‌شود</p>
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-gold to-gold/80 text-2xl text-ink shadow-lg shadow-gold/25">🤝</div>
+      <h1 class="text-xl font-bold text-vanilla">همکار</h1>
+      <p class="mt-1 text-sm text-cream/50">فضای کاری تیمی، همان‌جا که تب جدیدت باز می‌شود</p>
 
       <form id="login-form" class="mt-6 space-y-3">
         <input id="login-email" type="email" required autocomplete="email" placeholder="you@example.com" class="input text-center" />
@@ -20,50 +28,50 @@
       </form>
 
       <div id="login-waiting" class="mt-6 hidden">
-        <div class="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600"></div>
-        <p class="text-sm font-medium text-slate-600">ایمیل ورود برایت ارسال شد</p>
-        <p class="mt-1 text-xs leading-5 text-slate-400">ایمیل را باز کن و روی دکمه‌ی «ورود به همکار» بزن؛<br>همین صفحه خودکار وارد می‌شود.</p>
+        <div class="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-gold/25 border-t-gold"></div>
+        <p class="text-sm font-medium text-vanilla">ایمیل ورود برایت ارسال شد</p>
+        <p class="mt-1 text-xs leading-5 text-cream/45">ایمیل را باز کن و روی دکمه‌ی «ورود به همکار» بزن؛<br>همین صفحه خودکار وارد می‌شود.</p>
         <button id="login-cancel" class="btn-ghost mt-4">انصراف</button>
       </div>
 
-      <p id="login-error" class="mt-4 hidden rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-600"></p>
+      <p id="login-error" class="mt-4 hidden rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-300"></p>
     </div>
   </section>
 
   <!-- ═══════════════ App ═══════════════ -->
   <section id="app-view" class="hidden h-screen flex-col">
-    <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4">
+    <header class="glass flex h-14 shrink-0 items-center justify-between border-x-0 border-t-0 px-4">
       <div class="flex items-center gap-2">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">🤝</div>
-        <span class="font-bold">همکار</span>
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-b from-gold to-gold/80 text-ink shadow shadow-gold/25">🤝</div>
+        <span class="font-bold text-vanilla">همکار</span>
       </div>
       <div class="flex items-center gap-3">
-        <span id="user-email" class="text-xs text-slate-500"></span>
-        <button id="logout-btn" class="btn-ghost text-rose-500">خروج</button>
+        <span id="user-email" class="text-xs text-cream/50"></span>
+        <button id="logout-btn" class="btn-ghost text-rose-300/80 hover:bg-rose-500/10 hover:text-rose-300">خروج</button>
       </div>
     </header>
 
     <div class="flex min-h-0 flex-1">
-      <aside class="flex w-64 shrink-0 flex-col gap-4 overflow-y-auto border-l border-slate-200 bg-white p-3">
+      <aside class="flex w-64 shrink-0 flex-col gap-4 overflow-y-auto border-l border-white/10 bg-navy/30 p-3 backdrop-blur-2xl">
         <section>
           <div class="mb-1 flex items-center justify-between px-1">
-            <h2 class="text-xs font-bold text-slate-400">تیم‌ها</h2>
-            <button id="new-team-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-indigo-600" title="تیم جدید">+</button>
+            <h2 class="text-xs font-bold tracking-wide text-cream/35">تیم‌ها</h2>
+            <button id="new-team-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-gold hover:text-vanilla" title="تیم جدید">+</button>
           </div>
           <div id="teams-list" class="space-y-0.5"></div>
-          <button id="join-team-btn" class="mt-1 w-full rounded-xl px-2 py-1.5 text-right text-xs text-slate-400 hover:bg-slate-100 hover:text-indigo-600">+ عضویت با کد دعوت</button>
+          <button id="join-team-btn" class="mt-1 w-full rounded-xl px-2 py-1.5 text-right text-xs text-cream/35 transition hover:bg-white/5 hover:text-gold">+ عضویت با کد دعوت</button>
         </section>
 
         <section>
           <div class="mb-1 flex items-center justify-between px-1">
-            <h2 class="text-xs font-bold text-slate-400">پروژه‌ها</h2>
-            <button id="new-project-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-indigo-600" title="پروژه جدید">+</button>
+            <h2 class="text-xs font-bold tracking-wide text-cream/35">پروژه‌ها</h2>
+            <button id="new-project-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-gold hover:text-vanilla" title="پروژه جدید">+</button>
           </div>
           <div id="projects-list" class="space-y-0.5"></div>
         </section>
 
         <section id="invites-box" class="hidden">
-          <h2 class="mb-1 px-1 text-xs font-bold text-slate-400">دعوت‌نامه‌ها</h2>
+          <h2 class="mb-1 px-1 text-xs font-bold tracking-wide text-cream/35">دعوت‌نامه‌ها</h2>
           <div id="invites-list" class="space-y-1"></div>
         </section>
       </aside>
@@ -73,8 +81,8 @@
   </section>
 
   <!-- generic modal -->
-  <dialog id="modal" class="w-80 rounded-2xl p-6 shadow-2xl backdrop:bg-slate-900/40">
-    <h3 id="modal-title" class="mb-3 font-bold"></h3>
+  <dialog id="modal" class="w-80 rounded-2xl border border-white/10 bg-navy/80 p-6 text-cream shadow-2xl shadow-ink/60 backdrop-blur-2xl">
+    <h3 id="modal-title" class="mb-3 font-bold text-vanilla"></h3>
     <form id="modal-form" class="space-y-3"></form>
   </dialog>
 

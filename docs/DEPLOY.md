@@ -66,9 +66,11 @@ https://apps.webiro.ir/hamkar/api/install.php
 ## ۴) تست سلامت
 
 ```
-https://apps.webiro.ir/hamkar/api/index.php
+https://apps.webiro.ir/hamkar/api/
 → {"ok":true,"service":"hamkar-api",...}
 ```
+
+> نکته: آدرس را با `/api/` (پوشه) باز کن نه `/api/index.php` — در حالت دوم روتر مسیر `index.php` را پیدا نمی‌کند و 404 می‌دهد.
 
 بعدش ایمیل ورود را از اکستنشن تست کن (بخش اکستنشن در [README](../README.md)).
 

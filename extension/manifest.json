@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "همکار — Hamkar",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "فضای کاری تیمی در تب جدید: تیم، پروژه، فاز، نسخه، تسک، اسکیل، جلسه آنلاین و چت",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
@@ -13,11 +13,14 @@
   },
   "permissions": [
     "storage",
-    "clipboardWrite"
+    "clipboardWrite",
+    "tabs"
   ],
   "host_permissions": [
     "https://apps.webiro.ir/*",
-    "http://apps.webiro.ir/*"
+    "http://apps.webiro.ir/*",
+    "https://api.github.com/*",
+    "https://github.com/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"

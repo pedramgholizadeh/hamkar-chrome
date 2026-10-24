@@ -39,6 +39,17 @@ const ProfileView = {
           <p class="px-2 text-center text-[11px] leading-5 text-cream/30">
             نام و عکس تو در چت، تسک‌ها، اعضای تیم و فعالیت‌ها نمایش داده می‌شود.
           </p>
+
+          <div class="card p-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-vanilla">نسخه‌ی اکستنشن</h2>
+                <p id="version-line" class="mt-0.5 text-xs text-cream/40">v${chrome.runtime.getManifest().version}</p>
+              </div>
+              <button id="check-update-btn" class="btn-soft text-xs">${Util.icon('system_update_alt', 'text-base')} بررسی بروزرسانی</button>
+            </div>
+            <p class="mt-2 text-[10px] leading-5 text-cream/30">با هر نسخه‌ی جدید، از همان دکمه‌ی «بررسی بروزرسانی» زیپ تازه را بگیر و در chrome://extensions جایگزین کن.</p>
+          </div>
         </div>
       </div>`;
 
@@ -58,6 +69,20 @@ const ProfileView = {
         App.toast('عکس پروفایل به‌روز شد', false);
       } catch (err) {
         App.toast(Util.errorFa(err));
+      }
+    });
+
+    Util.byId('check-update-btn').addEventListener('click', async () => {
+      const line = Util.byId('version-line');
+      line.textContent = 'در حال بررسی…';
+      const info = await Updater.check();
+      if (!info) {
+        line.textContent = 'بررسی ناموفق — اینترنت را چک کن';
+      } else if (info.isNew) {
+        line.innerHTML = `نسخه‌ی جدید <b class="text-cyan">v${info.remote}</b> موجود است`;
+        window.open(info.url, '_blank');
+      } else {
+        line.textContent = `آخرین نسخه نصب است (v${info.local}) ✓`;
       }
     });
 

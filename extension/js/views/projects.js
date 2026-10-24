@@ -67,6 +67,8 @@ const Projects = {
     Util.byId('main').querySelectorAll('[data-tab]').forEach((btn) =>
       btn.addEventListener('click', () => Projects.setTab(btn.dataset.tab)));
 
+    Projects.paintCodeChip(data.project);
+    Projects.paintDeleteBtn(data.project);
     Projects.paintRepoChip(data.project);
     Projects.loadProgress(projectId);
     Projects.loadStats(projectId);
@@ -176,6 +178,63 @@ const Projects = {
         App.toast('ذخیره شد', false);
       },
     });
+  },
+
+  /** Invite code chip (copy + rotate for owners) and the delete button. */
+  paintCodeChip(project) {
+    const chip = Util.byId('repo-chip');
+    if (!chip) return;
+    const codeBtn = document.createElement('button');
+    codeBtn.id = 'project-code-btn';
+    codeBtn.className = 'inline-flex items-center gap-1 rounded-lg bg-white/5 px-2 py-0.5 transition hover:bg-white/10';
+    codeBtn.innerHTML = `${Util.icon('key', 'text-sm')} کد: <span class="font-mono font-bold text-cyan">${Util.esc(project.invite_code || '—')}</span>`;
+    codeBtn.addEventListener('click', async () => {
+      if (!project.invite_code) return;
+      await navigator.clipboard.writeText(project.invite_code);
+      App.toast('کد دعوت پروژه کپی شد', false);
+    });
+    chip.prepend(codeBtn);
+  },
+
+  paintDeleteBtn(project) {
+    const isProjectOwner = project.owner_id === App.state.user.id;
+    const team = App.state.teams.find((t) => t.id === project.team_id);
+    const isTeamOwner = team && team.owner_id === App.state.user.id;
+    if (!isProjectOwner && !isTeamOwner) return;
+
+    const header = Util.byId('main').querySelector('.glass.shrink-0');
+    if (!header) return;
+    const btn = document.createElement('button');
+    btn.id = 'project-delete-btn';
+    btn.className = 'btn-ghost h-8 w-8 px-0 text-rose-300/50 hover:bg-rose-500/10 hover:text-rose-300';
+    btn.title = 'حذف کامل پروژه';
+    btn.innerHTML = Util.icon('delete_forever', 'text-lg');
+    btn.addEventListener('click', () => {
+      App.modal({
+        title: 'حذف کامل پروژه؟',
+        customBody: `
+          <p class="text-xs leading-6 text-cream/60">پروژه‌ی <b class="text-vanilla">${Util.esc(project.name)}</b> به همراه همه‌ی تسک‌ها، پیام‌ها و فایل‌هایش برای همیشه حذف می‌شود. این کار برگشت‌پذیر نیست.</p>
+          <div class="flex gap-2 pt-2">
+            <button type="button" id="proj-del-cancel" class="btn-soft flex-1">انصراف</button>
+            <button type="button" id="proj-del-confirm" class="btn-danger flex-1">حذف قطعی</button>
+          </div>`,
+        onSubmit: async () => {},
+      });
+      Util.byId('proj-del-cancel').addEventListener('click', () => Util.byId('modal').close());
+      Util.byId('proj-del-confirm').addEventListener('click', async () => {
+        try {
+          await Api.request('projects/' + project.id, { method: 'DELETE' });
+          Util.byId('modal').close();
+          App.state.currentProject = null;
+          App.renderEmptyMain();
+          await Projects.load();
+          App.toast('پروژه حذف شد', false);
+        } catch (err) {
+          App.toast(Util.errorFa(err));
+        }
+      });
+    });
+    header.appendChild(btn);
   },
 
   // --------------------------------------------------------------- phases

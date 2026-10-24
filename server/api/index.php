@@ -75,6 +75,14 @@ Router::add('POST', 'teams/{id}/meetings', fn ($p) => MeetingController::create(
 Router::add('POST', 'meetings/{id}/join', fn ($p) => MeetingController::join($p));
 Router::add('POST', 'meetings/{id}/end', fn ($p) => MeetingController::end($p));
 
+// friends & private DM
+Router::add('GET', 'friends', fn ($p) => FriendController::index());
+Router::add('POST', 'friends/request', fn ($p) => FriendController::request());
+Router::add('POST', 'friends/{id}/accept', fn ($p) => FriendController::accept($p));
+Router::add('DELETE', 'friends/{id}', fn ($p) => FriendController::remove($p));
+Router::add('GET', 'dm/{id}/messages', fn ($p) => FriendController::messages($p));
+Router::add('POST', 'dm/{id}/messages', fn ($p) => FriendController::send($p, $config));
+
 // projects
 Router::add('GET', 'projects', fn ($p) => ProjectController::index());
 Router::add('POST', 'projects', fn ($p) => ProjectController::create());
@@ -86,6 +94,9 @@ Router::add('DELETE', 'phases/{id}', fn ($p) => ProjectController::deletePhase($
 Router::add('GET', 'projects/{id}/versions', fn ($p) => ProjectController::versions($p));
 Router::add('POST', 'projects/{id}/versions', fn ($p) => ProjectController::createVersion($p));
 Router::add('DELETE', 'versions/{id}', fn ($p) => ProjectController::deleteVersion($p));
+Router::add('DELETE', 'projects/{id}', fn ($p) => ProjectController::destroy($p));
+Router::add('POST', 'projects/{id}/code', fn ($p) => ProjectController::rotateCode($p));
+Router::add('POST', 'projects/join', fn ($p) => ProjectController::joinByCode());
 
 // tasks
 Router::add('GET', 'projects/{id}/tasks', fn ($p) => TaskController::listForProject($p));

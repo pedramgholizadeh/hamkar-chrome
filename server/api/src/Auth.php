@@ -73,7 +73,7 @@ final class Auth
         ) !== null;
     }
 
-    /** A project is visible to its owner and to members of its team (if any). */
+    /** A project is visible to its owner, its team members, and direct members added by invite code. */
     public static function canAccessProject(array $project, int $userId): bool
     {
         if ((int) $project['owner_id'] === $userId) {
@@ -82,7 +82,10 @@ final class Auth
         if ($project['team_id'] !== null && self::isTeamMember((int) $project['team_id'], $userId)) {
             return true;
         }
-        return false;
+        return Database::one(
+            'SELECT id FROM project_members WHERE project_id = ? AND user_id = ?',
+            [$project['id'], $userId]
+        ) !== null;
     }
 
     /** Fetch a project after checking access, or fail with 404/403. */

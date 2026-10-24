@@ -210,3 +210,39 @@ CREATE TABLE IF NOT EXISTS password_setups (
   UNIQUE KEY uq_password_setup_token (token),
   KEY ix_setup_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────── v0.4 additions ───────────────────────────
+-- projects: invite_code CHAR(10) UNIQUE (nullable)
+
+CREATE TABLE IF NOT EXISTS friendships (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  requester_id BIGINT UNSIGNED NOT NULL,
+  addressee_id BIGINT UNSIGNED NOT NULL,
+  status ENUM('pending','accepted') NOT NULL DEFAULT 'pending',
+  created_at DATETIME NOT NULL,
+  UNIQUE KEY uq_friend_pair (requester_id, addressee_id),
+  CONSTRAINT fk_fr_requester FOREIGN KEY (requester_id) REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT fk_fr_addressee FOREIGN KEY (addressee_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS dm_messages (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  sender_id BIGINT UNSIGNED NOT NULL,
+  receiver_id BIGINT UNSIGNED NOT NULL,
+  body TEXT DEFAULT NULL,
+  file_id BIGINT UNSIGNED DEFAULT NULL,
+  created_at DATETIME NOT NULL,
+  KEY ix_dm_pair (sender_id, receiver_id, id),
+  CONSTRAINT fk_dm_sender FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT fk_dm_receiver FOREIGN KEY (receiver_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS project_members (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  project_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  joined_at DATETIME NOT NULL,
+  UNIQUE KEY uq_project_member (project_id, user_id),
+  CONSTRAINT fk_pm_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
+  CONSTRAINT fk_pm_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

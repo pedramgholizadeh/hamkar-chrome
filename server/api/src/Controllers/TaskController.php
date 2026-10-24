@@ -140,9 +140,15 @@ final class TaskController
 
     private static function canAssign(array $project, int $userId): bool
     {
-        if ($project['team_id'] !== null) {
-            return Auth::isTeamMember((int) $project['team_id'], $userId);
+        if ((int) $project['owner_id'] === $userId) {
+            return true;
         }
-        return $userId === (int) $project['owner_id'];
+        if ($project['team_id'] !== null && Auth::isTeamMember((int) $project['team_id'], $userId)) {
+            return true;
+        }
+        return Database::one(
+            'SELECT id FROM project_members WHERE project_id = ? AND user_id = ?',
+            [$project['id'], $userId]
+        ) !== null;
     }
 }

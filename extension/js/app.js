@@ -39,6 +39,8 @@ const App = {
     Teams.load().catch(() => {});
     Projects.load().catch(() => {});
     App.loadInvites();
+    Friends.load();
+    Updater.check();
   },
 
   async renderHeaderUser() {
@@ -208,6 +210,63 @@ Util.byId('new-project-btn').addEventListener('click', () => {
       await Api.request('projects', { method: 'POST', body });
       await Projects.load();
       App.toast('پروژه ساخته شد 🎉', false);
+    },
+  });
+});
+
+// ─────────────────────────── auto-update ───────────────────────────────
+// Reads the Latest release from GitHub; if newer than the installed
+// manifest version, shows an in-panel update banner.
+
+const Updater = {
+  RELEASES: 'https://api.github.com/repos/pedramgholizadeh/hamkar-chrome/releases/latest',
+
+  compare(a, b) {
+    const pa = String(a).split('.').map(Number);
+    const pb = String(b).split('.').map(Number);
+    for (let i = 0; i < 3; i++) {
+      const diff = (pa[i] || 0) - (pb[i] || 0);
+      if (diff) return diff;
+    }
+    return 0;
+  },
+
+  async check() {
+    try {
+      const res = await fetch(Updater.RELEASES, { headers: { Accept: 'application/vnd.github+json' } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const remote = String(data.tag_name || '').replace(/^v/, '');
+      const local = chrome.runtime.getManifest().version;
+      const isNew = remote && Updater.compare(remote, local) > 0;
+
+      const banner = Util.byId('update-banner');
+      if (isNew && banner) {
+        banner.classList.remove('hidden');
+        banner.classList.add('flex');
+        banner.querySelector('[data-update-version]').textContent = 'v' + remote;
+        Util.byId('update-btn').onclick = () => {
+          window.open(data.html_url, '_blank');
+          App.toast('زیپ جدید را دانلود کن، پوشه را جایگزین کن و اکستنشن را Reload کن', false);
+        };
+      }
+      return { remote, local, isNew, url: data.html_url };
+    } catch {
+      return null;
+    }
+  },
+};
+
+// ───────────────────── join project by invite code ─────────────────────
+Util.byId('join-project-btn').addEventListener('click', () => {
+  App.modal({
+    title: 'عضویت در پروژه',
+    fields: [{ name: 'code', label: 'کد دعوت پروژه', placeholder: 'مثلاً X9Y8Z7W6V5' }],
+    submitLabel: 'عضویت',
+    onSubmit: async (v) => {
+      await Api.request('projects/join', { method: 'POST', body: { code: v.code.trim().toUpperCase() } });
+      await Projects.load();
+      App.toast('به پروژه اضافه شدی 🎉', false);
     },
   });
 });

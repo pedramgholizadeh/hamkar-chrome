@@ -81,7 +81,11 @@ final class TeamController
                 [$teamId]
             )
         );
-        Http::json(['ok' => true, 'team' => $team, 'members' => $members]);
+        $projects = Database::all(
+            'SELECT id, name, created_at FROM projects WHERE team_id = ? ORDER BY id DESC',
+            [$teamId]
+        );
+        Http::json(['ok' => true, 'team' => $team, 'members' => $members, 'projects' => $projects]);
     }
 
     /** Owner-only team personalization: rename. */

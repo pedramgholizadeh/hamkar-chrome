@@ -105,6 +105,12 @@ const Teams = {
             </form>
           </div>
 
+          <!-- team projects -->
+          <div class="panel col-span-6 p-5">
+            <h2 class="mb-3 flex items-center gap-1.5 text-sm font-bold text-vanilla"><span class="ms text-base text-cyan">folder_shared</span> پروژه‌های تیم</h2>
+            <div id="team-projects" class="grid grid-cols-3 gap-2"></div>
+          </div>
+
           <!-- skills -->
           <div class="panel col-span-6 p-5">
             <div class="mb-3 flex items-center justify-between">
@@ -121,6 +127,7 @@ const Teams = {
         </div>
       </div>`;
 
+    Teams.renderTeamProjects(teamId, data.projects || []);
     Teams.paintPageLogo();
     Teams.renderMembers(data.members);
     Teams.loadMeetings(teamId);
@@ -189,6 +196,26 @@ const Teams = {
       }
       e.target.value = '';
     });
+  },
+
+  renderTeamProjects(teamId, projects) {
+    const box = Util.byId('team-projects');
+    if (!box) return;
+    if (!projects.length) {
+      box.innerHTML = `<p class="col-span-3 rounded-xl border border-dashed border-white/15 py-6 text-center text-xs text-cream/30">
+        هنوز پروژه‌ای به این تیم وصل نیست — هنگام ساخت پروژه، تیمش را انتخاب کن</p>`;
+      return;
+    }
+    box.innerHTML = projects.map((pr) => `
+      <button data-open-project="${pr.id}" class="card flex flex-col items-start gap-1 p-3 text-right transition hover:border-cyan/40">
+        <span class="flex w-full items-center gap-2">
+          ${Util.icon('folder_open', 'text-base text-cyan')}
+          <span class="min-w-0 flex-1 truncate text-sm font-medium">${Util.esc(pr.name)}</span>
+        </span>
+        <span class="text-[10px] text-cream/35">${Util.dateTimeFa(pr.created_at)}</span>
+      </button>`).join('');
+    box.querySelectorAll('[data-open-project]').forEach((btn) =>
+      btn.addEventListener('click', () => Projects.open(Number(btn.dataset.openProject))));
   },
 
   async paintPageLogo() {

@@ -13,9 +13,10 @@ final class ProjectController
              FROM projects p
              LEFT JOIN teams t ON t.id = p.team_id
              LEFT JOIN team_members tm ON tm.team_id = p.team_id AND tm.user_id = ?
-             WHERE p.owner_id = ? OR tm.user_id IS NOT NULL
+             LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = ?
+             WHERE p.owner_id = ? OR tm.user_id IS NOT NULL OR pm.user_id IS NOT NULL
              ORDER BY p.id DESC',
-            [$user['id'], $user['id']]
+            [$user['id'], $user['id'], $user['id']]
         );
         Http::json(['ok' => true, 'projects' => $projects]);
     }
@@ -39,9 +40,10 @@ final class ProjectController
             Http::error(403, 'forbidden');
         }
 
+        $inviteCode = strtoupper(substr(bin2hex(random_bytes(5)), 0, 10));
         $id = Database::insert(
-            'INSERT INTO projects (owner_id, team_id, name, description, created_at) VALUES (?, ?, ?, ?, UTC_TIMESTAMP())',
-            [$user['id'], $teamId, $name, $description !== '' ? $description : null]
+            'INSERT INTO projects (owner_id, team_id, invite_code, name, description, created_at) VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP())',
+            [$user['id'], $teamId, $inviteCode, $name, $description !== '' ? $description : null]
         );
 
         Http::json(['ok' => true, 'project' => self::row($id)]);
@@ -206,20 +208,98 @@ final class ProjectController
         ));
     }
 
-    /** Users with access to the project = possible task assignees. */
+    /** Users with access to the project = possible task assignees / chat members. */
     public static function membersOf(array $project): array
     {
-        if ($project['team_id'] !== null) {
-            return array_map([Shape::class, 'user'], Database::all(
-                'SELECT ' . Shape::USER_COLUMNS . ', tm.role
-                 FROM team_members tm JOIN users u ON u.id = tm.user_id
-                 WHERE tm.team_id = ?
-                 ORDER BY u.email',
-                [$project['team_id']]
-            ));
+        $rows = Database::all(
+            'SELECT DISTINCT ' . Shape::USER_COLUMNS . ",
+                    CASE WHEN u.id = :owner THEN 'owner' ELSE 'member' END AS role
+             FROM users u
+             WHERE u.id = :owner
+                OR u.id IN (SELECT user_id FROM team_members WHERE team_id = :team)
+                OR u.id IN (SELECT user_id FROM project_members WHERE project_id = :project)
+             ORDER BY u.email",
+            [
+                'owner' => (int) $project['owner_id'],
+                'team' => $project['team_id'] !== null ? (int) $project['team_id'] : 0,
+                'project' => (int) $project['id'],
+            ]
+        );
+        return array_map([Shape::class, 'user'], $rows);
+    }
+
+    /** Delete a project completely — its owner or (for team projects) the team owner. */
+    public static function destroy(array $params): void
+    {
+        $user = Auth::requireUser();
+        $project = Database::one('SELECT * FROM projects WHERE id = ?', [(int) $params['id']]);
+        if ($project === null) {
+            Http::error(404, 'project_not_found');
         }
 
-        $owner = Database::one('SELECT ' . Shape::USER_COLUMNS . ' FROM users u WHERE u.id = ?', [$project['owner_id']]);
-        return $owner === null ? [] : [Shape::user($owner)];
+        $isOwner = (int) $project['owner_id'] === (int) $user['id'];
+        $isTeamOwner = $project['team_id'] !== null && Database::one(
+            'SELECT id FROM teams WHERE id = ? AND owner_id = ?',
+            [$project['team_id'], $user['id']]
+        ) !== null;
+        if (!$isOwner && !$isTeamOwner) {
+            Http::error(403, 'forbidden');
+        }
+
+        // best-effort removal of uploaded files from disk
+        $files = Database::all('SELECT stored_path FROM files WHERE project_id = ?', [$project['id']]);
+        foreach ($files as $f) {
+            $path = Files::mediaDir() . '/' . $f['stored_path'];
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
+
+        Database::run('DELETE FROM projects WHERE id = ?', [$project['id']]);
+        Http::json(['ok' => true]);
+    }
+
+    /** Owner/team-owner: rotate the project invite code. */
+    public static function rotateCode(array $params): void
+    {
+        $user = Auth::requireUser();
+        $project = Database::one('SELECT * FROM projects WHERE id = ?', [(int) $params['id']]);
+        if ($project === null) {
+            Http::error(404, 'project_not_found');
+        }
+
+        $isOwner = (int) $project['owner_id'] === (int) $user['id'];
+        $isTeamOwner = $project['team_id'] !== null && Database::one(
+            'SELECT id FROM teams WHERE id = ? AND owner_id = ?',
+            [$project['team_id'], $user['id']]
+        ) !== null;
+        if (!$isOwner && !$isTeamOwner) {
+            Http::error(403, 'forbidden');
+        }
+
+        $code = strtoupper(substr(bin2hex(random_bytes(5)), 0, 10));
+        Database::run('UPDATE projects SET invite_code = ? WHERE id = ?', [$code, $project['id']]);
+        Http::json(['ok' => true, 'project' => self::row((int) $project['id'])]);
+    }
+
+    /** Join a project with its invite code. */
+    public static function joinByCode(): void
+    {
+        $user = Auth::requireUser();
+        $code = strtoupper(trim((string) (Http::body()['code'] ?? '')));
+        if ($code === '') {
+            Http::error(422, 'invalid_code');
+        }
+
+        $project = Database::one('SELECT id, name FROM projects WHERE invite_code = ?', [$code]);
+        if ($project === null) {
+            Http::error(404, 'invite_code_invalid');
+        }
+
+        Database::run(
+            'INSERT IGNORE INTO project_members (project_id, user_id, joined_at) VALUES (?, ?, UTC_TIMESTAMP())',
+            [$project['id'], $user['id']]
+        );
+        Http::json(['ok' => true, 'project' => $project]);
     }
 }

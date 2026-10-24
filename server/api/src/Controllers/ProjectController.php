@@ -213,16 +213,17 @@ final class ProjectController
     {
         $rows = Database::all(
             'SELECT DISTINCT ' . Shape::USER_COLUMNS . ",
-                    CASE WHEN u.id = :owner THEN 'owner' ELSE 'member' END AS role
+                    CASE WHEN u.id = ? THEN 'owner' ELSE 'member' END AS role
              FROM users u
-             WHERE u.id = :owner
-                OR u.id IN (SELECT user_id FROM team_members WHERE team_id = :team)
-                OR u.id IN (SELECT user_id FROM project_members WHERE project_id = :project)
+             WHERE u.id = ?
+                OR u.id IN (SELECT user_id FROM team_members WHERE team_id = ?)
+                OR u.id IN (SELECT user_id FROM project_members WHERE project_id = ?)
              ORDER BY u.email",
             [
-                'owner' => (int) $project['owner_id'],
-                'team' => $project['team_id'] !== null ? (int) $project['team_id'] : 0,
-                'project' => (int) $project['id'],
+                (int) $project['owner_id'],
+                (int) $project['owner_id'],
+                $project['team_id'] !== null ? (int) $project['team_id'] : 0,
+                (int) $project['id'],
             ]
         );
         return array_map([Shape::class, 'user'], $rows);

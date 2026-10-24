@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>همکار</title>
+  <link rel="stylesheet" href="assets/css/tailwind.css" />
+</head>
+<body class="h-screen overflow-hidden bg-slate-100 text-slate-800">
+
+  <!-- ═══════════════ Login ═══════════════ -->
+  <section id="login-view" class="hidden h-screen items-center justify-center bg-gradient-to-br from-indigo-600 via-indigo-500 to-sky-500 p-6">
+    <div class="card w-full max-w-sm p-8 text-center">
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-2xl text-white">🤝</div>
+      <h1 class="text-xl font-bold">همکار</h1>
+      <p class="mt-1 text-sm text-slate-500">فضای کاری تیمی، همان‌جا که تب جدیدت باز می‌شود</p>
+
+      <form id="login-form" class="mt-6 space-y-3">
+        <input id="login-email" type="email" required autocomplete="email" placeholder="you@example.com" class="input text-center" />
+        <button type="submit" class="btn-primary w-full">ورود با ایمیل</button>
+      </form>
+
+      <div id="login-waiting" class="mt-6 hidden">
+        <div class="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600"></div>
+        <p class="text-sm font-medium text-slate-600">ایمیل ورود برایت ارسال شد</p>
+        <p class="mt-1 text-xs leading-5 text-slate-400">ایمیل را باز کن و روی دکمه‌ی «ورود به همکار» بزن؛<br>همین صفحه خودکار وارد می‌شود.</p>
+        <button id="login-cancel" class="btn-ghost mt-4">انصراف</button>
+      </div>
+
+      <p id="login-error" class="mt-4 hidden rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-600"></p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ App ═══════════════ -->
+  <section id="app-view" class="hidden h-screen flex-col">
+    <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4">
+      <div class="flex items-center gap-2">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">🤝</div>
+        <span class="font-bold">همکار</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="user-email" class="text-xs text-slate-500"></span>
+        <button id="logout-btn" class="btn-ghost text-rose-500">خروج</button>
+      </div>
+    </header>
+
+    <div class="flex min-h-0 flex-1">
+      <aside class="flex w-64 shrink-0 flex-col gap-4 overflow-y-auto border-l border-slate-200 bg-white p-3">
+        <section>
+          <div class="mb-1 flex items-center justify-between px-1">
+            <h2 class="text-xs font-bold text-slate-400">تیم‌ها</h2>
+            <button id="new-team-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-indigo-600" title="تیم جدید">+</button>
+          </div>
+          <div id="teams-list" class="space-y-0.5"></div>
+          <button id="join-team-btn" class="mt-1 w-full rounded-xl px-2 py-1.5 text-right text-xs text-slate-400 hover:bg-slate-100 hover:text-indigo-600">+ عضویت با کد دعوت</button>
+        </section>
+
+        <section>
+          <div class="mb-1 flex items-center justify-between px-1">
+            <h2 class="text-xs font-bold text-slate-400">پروژه‌ها</h2>
+            <button id="new-project-btn" class="btn-ghost h-6 px-2 text-lg leading-none text-indigo-600" title="پروژه جدید">+</button>
+          </div>
+          <div id="projects-list" class="space-y-0.5"></div>
+        </section>
+
+        <section id="invites-box" class="hidden">
+          <h2 class="mb-1 px-1 text-xs font-bold text-slate-400">دعوت‌نامه‌ها</h2>
+          <div id="invites-list" class="space-y-1"></div>
+        </section>
+      </aside>
+
+      <main id="main" class="min-w-0 flex-1 overflow-hidden"></main>
+    </div>
+  </section>
+
+  <!-- generic modal -->
+  <dialog id="modal" class="w-80 rounded-2xl p-6 shadow-2xl backdrop:bg-slate-900/40">
+    <h3 id="modal-title" class="mb-3 font-bold"></h3>
+    <form id="modal-form" class="space-y-3"></form>
+  </dialog>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/views/login.js"></script>
+  <script src="js/views/teams.js"></script>
+  <script src="js/views/projects.js"></script>
+  <script src="js/views/tasks.js"></script>
+  <script src="js/views/chat.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

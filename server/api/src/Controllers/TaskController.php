@@ -30,10 +30,12 @@ final class TaskController
             Http::error(422, 'invalid_assignee');
         }
 
+        [$phaseId, $priority, $dueDate] = self::readExtras($project, $body);
+
         Database::insert(
-            'INSERT INTO tasks (project_id, title, assignee_id, created_by, done, created_at)
-             VALUES (?, ?, ?, ?, 0, UTC_TIMESTAMP())',
-            [$project['id'], $title, $assigneeId, $user['id']]
+            'INSERT INTO tasks (project_id, title, assignee_id, created_by, phase_id, priority, due_date, done, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 0, UTC_TIMESTAMP())',
+            [$project['id'], $title, $assigneeId, $user['id'], $phaseId, $priority, $dueDate]
         );
 
         Http::json(['ok' => true, 'tasks' => self::allFor((int) $project['id'])]);
@@ -63,24 +65,77 @@ final class TaskController
             }
         }
 
+        [$phaseId, $priority, $dueDate] = self::readExtras($project, $body, $task);
+        if ($phaseId !== null) {
+            Database::run('UPDATE tasks SET phase_id = ? WHERE id = ?', [$phaseId, $task['id']]);
+        }
+        if ($priority !== null) {
+            Database::run('UPDATE tasks SET priority = ? WHERE id = ?', [$priority, $task['id']]);
+        }
+        if ($dueDate !== false) {
+            Database::run('UPDATE tasks SET due_date = ? WHERE id = ?', [$dueDate, $task['id']]);
+        }
+
         Http::json(['ok' => true, 'tasks' => self::allFor((int) $project['id'])]);
     }
 
     // ------------------------------------------------------------- helpers
 
+    /** @return array{0: ?int, 1: string, 2: string|false|null} phase, priority, due (false = untouched) */
+    private static function readExtras(array $project, array $body, ?array $task = null): array
+    {
+        // phase must belong to this project
+        $phaseId = null;
+        if (array_key_exists('phase_id', $body)) {
+            $phaseId = $body['phase_id'] === null || $body['phase_id'] === '' ? null : (int) $body['phase_id'];
+            if ($phaseId !== null) {
+                $phase = Database::one('SELECT id FROM project_phases WHERE id = ? AND project_id = ?', [$phaseId, $project['id']]);
+                if ($phase === null) {
+                    Http::error(422, 'invalid_phase');
+                }
+            }
+        }
+
+        $priority = 'medium';
+        if (isset($body['priority'])) {
+            $priority = (string) $body['priority'];
+            if (!in_array($priority, ['low', 'medium', 'high'], true)) {
+                Http::error(422, 'invalid_priority');
+            }
+        } elseif ($task !== null) {
+            $priority = (string) $task['priority'];
+        }
+
+        $dueDate = false;
+        if (array_key_exists('due_date', $body)) {
+            $due = trim((string) ($body['due_date'] ?? ''));
+            $dueDate = null;
+            if ($due !== '') {
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $due)) {
+                    Http::error(422, 'invalid_due_date');
+                }
+                $dueDate = $due;
+            }
+        }
+
+        return [$phaseId, $priority, $dueDate];
+    }
+
     private static function allFor(int $projectId): array
     {
-        return Database::all(
-            'SELECT tk.id, tk.project_id, tk.title, tk.done, tk.created_at, tk.done_at,
-                    tk.assignee_id, ua.email AS assignee_email, ua.name AS assignee_name,
-                    tk.created_by, uc.email AS creator_email, uc.name AS creator_name
+        $rows = Database::all(
+            'SELECT tk.*, ph.title AS phase_title,
+                    ua.email AS assignee_email, ua.first_name AS assignee_first_name, ua.last_name AS assignee_last_name, ua.name AS assignee_name, ua.avatar_file_id AS assignee_avatar_file_id,
+                    uc.email AS creator_email, uc.first_name AS creator_first_name, uc.last_name AS creator_last_name, uc.name AS creator_name, uc.avatar_file_id AS creator_avatar_file_id
              FROM tasks tk
+             LEFT JOIN project_phases ph ON ph.id = tk.phase_id
              LEFT JOIN users ua ON ua.id = tk.assignee_id
              JOIN users uc ON uc.id = tk.created_by
              WHERE tk.project_id = ?
              ORDER BY tk.done ASC, tk.id DESC',
             [$projectId]
         );
+        return array_map([Shape::class, 'task'], $rows);
     }
 
     private static function canAssign(array $project, int $userId): bool

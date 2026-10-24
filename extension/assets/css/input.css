@@ -7,6 +7,15 @@
   font-display: swap;
 }
 
+/* Material Symbols Rounded — bundled locally */
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  src: url('../fonts/MaterialSymbolsRounded-var.woff2') format('woff2-variations');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: block;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +25,6 @@
     font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Arial, sans-serif;
   }
 
-  /* minimal translucent scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -32,7 +40,6 @@
     background: rgba(252, 249, 234, 0.28);
   }
 
-  /* the generic modal is styled as a glass sheet */
   dialog {
     border: none;
     padding: 0;
@@ -46,7 +53,6 @@
 }
 
 @layer components {
-  /* liquid glass surfaces */
   .glass {
     @apply border border-white/10 bg-navy/40 backdrop-blur-2xl;
   }
@@ -56,10 +62,60 @@
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-gold to-gold/80 px-4 py-2 text-sm font-semibold text-ink shadow-lg shadow-gold/25 transition hover:brightness-110 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
+  .btn-soft {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-cream/80 transition hover:bg-white/10 hover:text-cream;
+  }
   .btn-ghost {
     @apply inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm text-cream/70 transition hover:bg-white/10 hover:text-cream;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300 transition hover:bg-rose-500/20;
   }
   .input {
     @apply w-full rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm text-cream placeholder-cream/35 outline-none transition focus:border-gold/60 focus:bg-white/15 focus:ring-2 focus:ring-gold/20;
   }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium;
+  }
+
+  /* Material Symbols icon */
+  .ms {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    user-select: none;
+  }
+  .ms-fill {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+}
+
+@layer utilities {
+  /* rendered markdown (skills, version notes) */
+  .md {
+    @apply text-sm leading-7 text-cream/85;
+  }
+  .md h1 { @apply mb-2 mt-4 text-lg font-bold text-vanilla; }
+  .md h2 { @apply mb-2 mt-4 text-base font-bold text-vanilla; }
+  .md h3 { @apply mb-1 mt-3 text-sm font-bold text-vanilla; }
+  .md p { @apply my-2; }
+  .md ul { @apply my-2 list-disc space-y-1 ps-5; }
+  .md ol { @apply my-2 list-decimal space-y-1 ps-5; }
+  .md a { @apply text-gold underline decoration-gold/40 hover:decoration-gold; }
+  .md code { @apply rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-[12px] text-vanilla; }
+  .md pre { @apply my-2 overflow-x-auto rounded-xl border border-white/10 bg-ink/50 p-3; }
+  .md pre code { @apply bg-transparent p-0 text-[12px] leading-6; }
+  .md blockquote { @apply my-2 border-e-2 border-gold/50 pe-3 text-cream/60; }
+  .md hr { @apply my-4 border-white/10; }
+  .md strong { @apply font-bold text-vanilla; }
 }

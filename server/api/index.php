@@ -12,6 +12,7 @@ declare(strict_types=1);
 require __DIR__ . '/src/Http.php';
 require __DIR__ . '/src/Router.php';
 require __DIR__ . '/src/Database.php';
+require __DIR__ . '/src/Shape.php';
 require __DIR__ . '/src/Auth.php';
 require __DIR__ . '/src/Mailer.php';
 require __DIR__ . '/src/Files.php';
@@ -40,12 +41,14 @@ Database::init($config['db']);
 
 Router::add('GET', '', fn () => Http::json(['ok' => true, 'service' => 'hamkar-api', 'time' => gmdate('c')]));
 
-// auth
+// auth & profile
 Router::add('POST', 'auth/request', fn ($p) => AuthController::request($config));
 Router::add('GET', 'auth/poll', fn ($p) => AuthController::poll());
 Router::add('GET', 'auth/verify', fn ($p) => AuthController::verify());
 Router::add('POST', 'auth/logout', fn ($p) => AuthController::logout());
-Router::add('GET', 'me', fn ($p) => AuthController::me());
+Router::add('GET', 'me', fn ($p) => ProfileController::me());
+Router::add('PATCH', 'me', fn ($p) => ProfileController::update());
+Router::add('POST', 'me/avatar', fn ($p) => ProfileController::avatar($p, $config));
 
 // teams
 Router::add('GET', 'teams', fn ($p) => TeamController::index());
@@ -54,12 +57,34 @@ Router::add('POST', 'teams/join', fn ($p) => TeamController::join());
 Router::add('GET', 'invites', fn ($p) => TeamController::myInvites());
 Router::add('POST', 'invites/{id}/accept', fn ($p) => TeamController::acceptInvite($p));
 Router::add('GET', 'teams/{id}', fn ($p) => TeamController::show($p));
+Router::add('PATCH', 'teams/{id}', fn ($p) => TeamController::update($p));
+Router::add('POST', 'teams/{id}/logo', fn ($p) => TeamController::logo($p, $config));
 Router::add('POST', 'teams/{id}/invite', fn ($p) => TeamController::invite($p));
+
+// team skills (Skill.md sharing)
+Router::add('GET', 'teams/{id}/skills', fn ($p) => SkillsController::index($p));
+Router::add('POST', 'teams/{id}/skills', fn ($p) => SkillsController::create($p, $config));
+Router::add('GET', 'skills/{id}', fn ($p) => SkillsController::show($p));
+Router::add('PATCH', 'skills/{id}', fn ($p) => SkillsController::update($p, $config));
+Router::add('DELETE', 'skills/{id}', fn ($p) => SkillsController::delete($p));
+
+// google meet rooms
+Router::add('GET', 'teams/{id}/meetings', fn ($p) => MeetingController::index($p));
+Router::add('POST', 'teams/{id}/meetings', fn ($p) => MeetingController::create($p));
+Router::add('POST', 'meetings/{id}/join', fn ($p) => MeetingController::join($p));
+Router::add('POST', 'meetings/{id}/end', fn ($p) => MeetingController::end($p));
 
 // projects
 Router::add('GET', 'projects', fn ($p) => ProjectController::index());
 Router::add('POST', 'projects', fn ($p) => ProjectController::create());
 Router::add('GET', 'projects/{id}', fn ($p) => ProjectController::show($p));
+Router::add('PATCH', 'projects/{id}', fn ($p) => ProjectController::update($p));
+Router::add('GET', 'projects/{id}/phases', fn ($p) => ProjectController::phases($p));
+Router::add('POST', 'projects/{id}/phases', fn ($p) => ProjectController::createPhase($p));
+Router::add('DELETE', 'phases/{id}', fn ($p) => ProjectController::deletePhase($p));
+Router::add('GET', 'projects/{id}/versions', fn ($p) => ProjectController::versions($p));
+Router::add('POST', 'projects/{id}/versions', fn ($p) => ProjectController::createVersion($p));
+Router::add('DELETE', 'versions/{id}', fn ($p) => ProjectController::deleteVersion($p));
 
 // tasks
 Router::add('GET', 'projects/{id}/tasks', fn ($p) => TaskController::listForProject($p));

@@ -3,18 +3,22 @@
 declare(strict_types=1);
 
 /**
- * Telegram-style project chat: text messages and file attachments.
- * The extension polls GET /projects/{id}/messages?after_id=… every few seconds.
+ * Telegram-style project chat: text, files, replies. Polled by the extension.
  */
 final class ChatController
 {
     private const SELECT = '
         SELECT m.id, m.body, m.created_at, m.user_id,
-               u.email AS user_email, u.name AS user_name,
-               f.id AS f_id, f.original_name AS f_name, f.mime_type AS f_mime, f.size AS f_size
+               u.email AS user_email, u.first_name AS user_first_name, u.last_name AS user_last_name,
+               u.name AS user_name, u.avatar_file_id AS user_avatar_file_id, u.last_seen_at AS user_last_seen_at,
+               f.id AS f_id, f.original_name AS f_name, f.mime_type AS f_mime, f.size AS f_size,
+               r.id AS reply_id, r.body AS reply_body,
+               ru.email AS reply_email, ru.first_name AS reply_first_name, ru.last_name AS reply_last_name, ru.name AS reply_name
         FROM messages m
         JOIN users u ON u.id = m.user_id
-        LEFT JOIN files f ON f.id = m.file_id';
+        LEFT JOIN files f ON f.id = m.file_id
+        LEFT JOIN messages r ON r.id = m.reply_to_id
+        LEFT JOIN users ru ON ru.id = r.user_id';
 
     public static function messages(array $params): void
     {
@@ -27,7 +31,7 @@ final class ChatController
             [$project['id'], $afterId]
         );
 
-        Http::json(['ok' => true, 'messages' => array_map([self::class, 'shape'], $rows)]);
+        Http::json(['ok' => true, 'messages' => array_map([Shape::class, 'message'], $rows)]);
     }
 
     public static function send(array $params, array $config): void
@@ -35,7 +39,17 @@ final class ChatController
         $user = Auth::requireUser();
         $project = Auth::requireProject((int) $params['id'], (int) $user['id']);
 
-        $text = trim((string) (Http::body()['body'] ?? ''));
+        $body = Http::body();
+        $text = trim((string) ($body['body'] ?? ''));
+
+        $replyToId = null;
+        if (isset($body['reply_to_id']) && $body['reply_to_id'] !== '' && $body['reply_to_id'] !== null) {
+            $replyToId = (int) $body['reply_to_id'];
+            $parent = Database::one('SELECT id FROM messages WHERE id = ? AND project_id = ?', [$replyToId, $project['id']]);
+            if ($parent === null) {
+                Http::error(422, 'invalid_reply');
+            }
+        }
 
         $fileRow = null;
         if (isset($_FILES['file']) && is_array($_FILES['file'])
@@ -52,33 +66,11 @@ final class ChatController
         }
 
         $messageId = Database::insert(
-            'INSERT INTO messages (project_id, user_id, body, file_id, created_at) VALUES (?, ?, ?, ?, UTC_TIMESTAMP())',
-            [$project['id'], $user['id'], $text !== '' ? $text : null, $fileRow['id'] ?? null]
+            'INSERT INTO messages (project_id, user_id, body, file_id, reply_to_id, created_at) VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP())',
+            [$project['id'], $user['id'], $text !== '' ? $text : null, $fileRow['id'] ?? null, $replyToId]
         );
 
         $row = Database::one(self::SELECT . ' WHERE m.id = ?', [$messageId]);
-        Http::json(['ok' => true, 'message' => self::shape((array) $row)]);
-    }
-
-    // ------------------------------------------------------------- helpers
-
-    private static function shape(array $r): array
-    {
-        return [
-            'id' => (int) $r['id'],
-            'body' => $r['body'],
-            'created_at' => $r['created_at'],
-            'user' => [
-                'id' => (int) $r['user_id'],
-                'email' => $r['user_email'],
-                'name' => $r['user_name'],
-            ],
-            'file' => $r['f_id'] === null ? null : [
-                'id' => (int) $r['f_id'],
-                'name' => $r['f_name'],
-                'mime' => $r['f_mime'],
-                'size' => (int) $r['f_size'],
-            ],
-        ];
+        Http::json(['ok' => true, 'message' => Shape::message((array) $row)]);
     }
 }

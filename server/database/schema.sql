@@ -119,3 +119,68 @@ CREATE TABLE IF NOT EXISTS files (
   KEY ix_files_project (project_id),
   CONSTRAINT fk_files_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────── v0.2 additions ───────────────────────────
+-- (install.php also applies these as idempotent ALTERs for existing installs)
+
+-- users: first_name VARCHAR(80), last_name VARCHAR(80), avatar_file_id BIGINT UNSIGNED, last_seen_at DATETIME
+-- teams: logo_file_id BIGINT UNSIGNED
+-- projects: repo_url VARCHAR(500)
+-- tasks: phase_id BIGINT UNSIGNED, priority ENUM('low','medium','high') DEFAULT 'medium', due_date DATE
+-- messages: reply_to_id BIGINT UNSIGNED
+-- files: project_id became nullable (avatars / team logos)
+
+CREATE TABLE IF NOT EXISTS project_phases (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  project_id BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(160) NOT NULL,
+  position INT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL,
+  KEY ix_phases_project (project_id),
+  CONSTRAINT fk_phases_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS project_versions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  project_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(60) NOT NULL,
+  notes TEXT DEFAULT NULL,
+  created_by BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL,
+  KEY ix_versions_project (project_id),
+  CONSTRAINT fk_versions_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS skills (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  team_id BIGINT UNSIGNED NOT NULL,
+  owner_id BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(160) NOT NULL,
+  content MEDIUMTEXT NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  KEY ix_skills_team (team_id),
+  CONSTRAINT fk_skills_team FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS team_meetings (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  team_id BIGINT UNSIGNED NOT NULL,
+  created_by BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(160) DEFAULT NULL,
+  url VARCHAR(500) NOT NULL,
+  status ENUM('active','ended') NOT NULL DEFAULT 'active',
+  created_at DATETIME NOT NULL,
+  ended_at DATETIME DEFAULT NULL,
+  KEY ix_meetings_team (team_id),
+  CONSTRAINT fk_meetings_team FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS meeting_attendance (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  meeting_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  joined_at DATETIME NOT NULL,
+  UNIQUE KEY uq_meeting_attendance (meeting_id, user_id),
+  CONSTRAINT fk_att_meeting FOREIGN KEY (meeting_id) REFERENCES team_meetings (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

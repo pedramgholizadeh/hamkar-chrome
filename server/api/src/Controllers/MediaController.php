@@ -31,7 +31,9 @@ final class MediaController
         if ($file === null) {
             Http::error(404, 'file_not_found');
         }
-        if ($file['project_id'] !== null) {
+        if ($file['project_id'] === null) {
+            // shared assets (avatars, team logos) — any signed-in member may view
+        } else {
             Auth::requireProject((int) $file['project_id'], (int) $user['id']);
         }
 

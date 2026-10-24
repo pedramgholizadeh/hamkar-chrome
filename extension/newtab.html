@@ -46,8 +46,10 @@
         <span class="font-bold text-vanilla">همکار</span>
       </div>
       <div class="flex items-center gap-3">
-        <span id="user-email" class="text-xs text-cream/50"></span>
-        <button id="logout-btn" class="btn-ghost text-rose-300/80 hover:bg-rose-500/10 hover:text-rose-300">خروج</button>
+        <button id="header-user-btn" class="flex items-center gap-2 rounded-xl px-2 py-1.5 text-xs text-cream/70 transition hover:bg-white/10 hover:text-cream" title="پروفایل">
+          <span id="header-user"></span>
+        </button>
+        <button id="logout-btn" class="btn-ghost text-rose-300/80 hover:bg-rose-500/10 hover:text-rose-300" title="خروج"><span class="ms">logout</span></button>
       </div>
     </header>
 
@@ -92,6 +94,7 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/views/login.js"></script>
+  <script src="js/views/profile.js"></script>
   <script src="js/views/teams.js"></script>
   <script src="js/views/projects.js"></script>
   <script src="js/views/tasks.js"></script>

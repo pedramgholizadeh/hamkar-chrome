@@ -17,7 +17,7 @@ const App = {
       return;
     }
     try {
-      const me = await Api.request('me'); // validate the stored token
+      const me = await Api.request('me'); // validate the stored token + refresh profile
       App.state.user = me.user;
     } catch {
       await Auth.logout();
@@ -34,32 +34,30 @@ const App = {
     app.classList.remove('hidden');
     app.classList.add('flex');
 
-    Util.byId('user-email').textContent = App.state.user.email;
+    App.renderHeaderUser();
     App.renderEmptyMain();
     Teams.load().catch(() => {});
     Projects.load().catch(() => {});
     App.loadInvites();
   },
 
+  async renderHeaderUser() {
+    const holder = Util.byId('header-user');
+    if (!holder) return;
+    const u = App.state.user;
+    holder.innerHTML = `${Util.esc(u.display_name || u.email)}`
+      + `<span id="header-avatar" class="inline-block align-middle"></span>`;
+    const slot = Util.byId('header-avatar');
+    if (slot) slot.innerHTML = await Util.avatarHtml(u, 'h-7 w-7 text-[10px]');
+  },
+
   renderEmptyMain() {
     Util.byId('main').innerHTML = `
       <div class="flex h-full flex-col items-center justify-center gap-2 text-cream/40">
         <div class="text-5xl">👋</div>
-        <p class="font-medium text-cream/60">از منوی کنار یک پروژه را انتخاب کن</p>
+        <p class="font-medium text-cream/60">از منوی کنار یک پروژه یا تیم را انتخاب کن</p>
         <p class="text-xs">یا با دکمه‌های + تیم و پروژه‌ی جدید بساز</p>
       </div>`;
-  },
-
-  setTab(tab) {
-    App.state.tab = tab;
-    const active = 'rounded-lg bg-gradient-to-b from-gold to-gold/85 px-4 py-1.5 font-semibold text-ink shadow transition';
-    const inactive = 'rounded-lg px-4 py-1.5 text-cream/50 transition hover:text-cream';
-    Util.byId('tab-chat').className = tab === 'chat' ? active : inactive;
-    Util.byId('tab-tasks').className = tab === 'tasks' ? active : inactive;
-
-    if (!App.state.currentProject) return;
-    if (tab === 'chat') Chat.open(App.state.currentProject.id);
-    else Tasks.open(App.state.currentProject.id);
   },
 
   async loadInvites() {
@@ -105,32 +103,34 @@ const App = {
     setTimeout(() => el.remove(), 3500);
   },
 
-  /** Generic dialog with dynamic fields; resolves through onSubmit(values). */
-  modal({ title, fields, submitLabel = 'ثبت', onSubmit }) {
+  /** Generic dialog: text inputs, textareas, or a fully custom body. */
+  modal({ title, fields = [], textareas = [], submitLabel = 'ثبت', customBody = null, onSubmit }) {
     const dlg = Util.byId('modal');
     const form = Util.byId('modal-form');
     Util.byId('modal-title').textContent = title;
 
-    form.innerHTML = fields.map((f) => {
-      if (f.type === 'select') {
-        const options = f.options.map((o) =>
-          `<option value="${Util.esc(o.value)}">${Util.esc(o.label)}</option>`).join('');
-        return `
-          <label class="block">
-            <span class="mb-1 block text-xs text-cream/45">${Util.esc(f.label)}</span>
-            <select name="${Util.esc(f.name)}" class="input">${options}</select>
-          </label>`;
-      }
-      return `
-        <label class="block">
-          <span class="mb-1 block text-xs text-cream/45">${Util.esc(f.label)}</span>
-          <input name="${Util.esc(f.name)}" type="${f.type || 'text'}" required class="input" placeholder="${Util.esc(f.placeholder || '')}" />
-        </label>`;
-    }).join('') + `
+    if (customBody !== null) {
+      form.innerHTML = customBody;
+      form.onsubmit = async (e) => e.preventDefault();
+      dlg.showModal();
+      return;
+    }
+
+    form.innerHTML = fields.map((f) => `
+      <label class="block">
+        <span class="mb-1 block text-xs text-cream/45">${Util.esc(f.label)}</span>
+        <input name="${Util.esc(f.name)}" type="${f.type || 'text'}" ${f.required === false ? '' : 'required'} class="input" placeholder="${Util.esc(f.placeholder || '')}" value="${Util.esc(f.value || '')}" />
+      </label>`).join('')
+      + textareas.map((f) => `
+      <label class="block">
+        <span class="mb-1 block text-xs text-cream/45">${Util.esc(f.label)}</span>
+        <textarea name="${Util.esc(f.name)}" rows="7" class="input resize-y font-mono text-xs leading-6" placeholder="${Util.esc(f.placeholder || '')}">${Util.esc(f.value || '')}</textarea>
+      </label>`).join('')
+      + (submitLabel ? `
       <div class="flex gap-2 pt-1">
         <button type="submit" class="btn-primary flex-1">${Util.esc(submitLabel)}</button>
         <button type="button" id="modal-cancel" class="btn-ghost">انصراف</button>
-      </div>`;
+      </div>` : '<button type="button" id="modal-cancel" class="btn-ghost mt-1 w-full">بستن</button>');
 
     form.onsubmit = async (e) => {
       e.preventDefault();
@@ -150,6 +150,7 @@ const App = {
 
 // -------------------------------------------------------------- wiring
 
+Util.byId('header-user-btn').addEventListener('click', () => ProfileView.open());
 Util.byId('logout-btn').addEventListener('click', async () => {
   Tasks.stopPoll();
   Chat.stopPoll();
@@ -176,7 +177,7 @@ Util.byId('new-project-btn').addEventListener('click', () => {
     title: 'پروژه‌ی جدید',
     fields: [
       { name: 'name', label: 'نام پروژه', placeholder: 'مثلاً بازطراحی سایت' },
-      { name: 'description', label: 'توضیح (اختیاری)', type: 'text', placeholder: '' },
+      { name: 'description', label: 'توضیح (اختیاری)', required: false },
       {
         name: 'team_id',
         label: 'متعلق به تیم',

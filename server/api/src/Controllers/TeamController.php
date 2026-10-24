@@ -8,7 +8,7 @@ final class TeamController
     {
         $user = Auth::requireUser();
         $teams = Database::all(
-            'SELECT t.id, t.name, t.invite_code, t.owner_id, tm.role, t.created_at
+            'SELECT t.id, t.name, t.invite_code, t.owner_id, t.logo_file_id, tm.role, t.created_at
              FROM teams t JOIN team_members tm ON tm.team_id = t.id
              WHERE tm.user_id = ?
              ORDER BY t.id DESC',
@@ -71,14 +71,59 @@ final class TeamController
             Http::error(404, 'team_not_found');
         }
 
-        $members = Database::all(
-            'SELECT u.id, u.email, u.name, tm.role
-             FROM team_members tm JOIN users u ON u.id = tm.user_id
-             WHERE tm.team_id = ?
-             ORDER BY tm.joined_at ASC',
-            [$teamId]
+        $members = array_map(
+            [Shape::class, 'user'],
+            Database::all(
+                'SELECT ' . Shape::USER_COLUMNS . ', tm.role
+                 FROM team_members tm JOIN users u ON u.id = tm.user_id
+                 WHERE tm.team_id = ?
+                 ORDER BY tm.joined_at ASC',
+                [$teamId]
+            )
         );
         Http::json(['ok' => true, 'team' => $team, 'members' => $members]);
+    }
+
+    /** Owner-only team personalization: rename. */
+    public static function update(array $params): void
+    {
+        $user = Auth::requireUser();
+        $teamId = (int) $params['id'];
+        self::requireOwner($teamId, (int) $user['id']);
+
+        $name = trim((string) (Http::body()['name'] ?? ''));
+        if ($name === '' || mb_strlen($name) > 120) {
+            Http::error(422, 'invalid_name');
+        }
+        Database::run('UPDATE teams SET name = ? WHERE id = ?', [$name, $teamId]);
+        Http::json(['ok' => true, 'team' => self::row($teamId)]);
+    }
+
+    /** Owner-only team logo upload. */
+    public static function logo(array $params, array $config): void
+    {
+        $user = Auth::requireUser();
+        $teamId = (int) $params['id'];
+        self::requireOwner($teamId, (int) $user['id']);
+
+        if (!isset($_FILES['logo']) || !is_array($_FILES['logo'])) {
+            Http::error(422, 'upload_failed');
+        }
+        $maxBytes = (int) ($config['app']['upload_max_bytes'] ?? 10 * 1024 * 1024);
+        $file = Files::store($_FILES['logo'], null, (int) $user['id'], min($maxBytes, 5 * 1024 * 1024));
+        if (!str_starts_with((string) $file['mime_type'], 'image/')) {
+            Http::error(422, 'invalid_file_type');
+        }
+
+        $old = Database::one('SELECT logo_file_id FROM teams WHERE id = ?', [$teamId]);
+        Database::run('UPDATE teams SET logo_file_id = ? WHERE id = ?', [$file['id'], $teamId]);
+        if ($old && $old['logo_file_id'] !== null) {
+            try {
+                Database::run('DELETE FROM files WHERE id = ?', [(int) $old['logo_file_id']]);
+            } catch (Throwable) {
+            }
+        }
+        Http::json(['ok' => true, 'team' => self::row($teamId)]);
     }
 
     public static function invite(array $params): void
@@ -153,9 +198,21 @@ final class TeamController
     public static function row(int $teamId): ?array
     {
         return Database::one(
-            'SELECT id, name, invite_code, owner_id, created_at FROM teams WHERE id = ?',
+            'SELECT t.id, t.name, t.invite_code, t.owner_id, t.logo_file_id, t.created_at
+             FROM teams t WHERE t.id = ?',
             [$teamId]
         );
+    }
+
+    public static function requireOwner(int $teamId, int $userId): void
+    {
+        $row = Database::one('SELECT owner_id FROM teams WHERE id = ?', [$teamId]);
+        if ($row === null) {
+            Http::error(404, 'team_not_found');
+        }
+        if ((int) $row['owner_id'] !== $userId) {
+            Http::error(403, 'only_owner_can_invite');
+        }
     }
 
     private static function ownerId(int $teamId): int

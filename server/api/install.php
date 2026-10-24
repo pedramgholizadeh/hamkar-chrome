@@ -155,7 +155,98 @@ $tables = [
           CONSTRAINT fk_files_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL,
+    'project_phases' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS project_phases (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          project_id BIGINT UNSIGNED NOT NULL,
+          title VARCHAR(160) NOT NULL,
+          position INT NOT NULL DEFAULT 0,
+          created_at DATETIME NOT NULL,
+          KEY ix_phases_project (project_id),
+          CONSTRAINT fk_phases_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
+    'project_versions' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS project_versions (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          project_id BIGINT UNSIGNED NOT NULL,
+          name VARCHAR(60) NOT NULL,
+          notes TEXT DEFAULT NULL,
+          created_by BIGINT UNSIGNED NOT NULL,
+          created_at DATETIME NOT NULL,
+          KEY ix_versions_project (project_id),
+          CONSTRAINT fk_versions_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
+    'skills' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS skills (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          team_id BIGINT UNSIGNED NOT NULL,
+          owner_id BIGINT UNSIGNED NOT NULL,
+          title VARCHAR(160) NOT NULL,
+          content MEDIUMTEXT NOT NULL,
+          created_at DATETIME NOT NULL,
+          updated_at DATETIME NOT NULL,
+          KEY ix_skills_team (team_id),
+          CONSTRAINT fk_skills_team FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
+    'team_meetings' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS team_meetings (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          team_id BIGINT UNSIGNED NOT NULL,
+          created_by BIGINT UNSIGNED NOT NULL,
+          title VARCHAR(160) DEFAULT NULL,
+          url VARCHAR(500) NOT NULL,
+          status ENUM('active','ended') NOT NULL DEFAULT 'active',
+          created_at DATETIME NOT NULL,
+          ended_at DATETIME DEFAULT NULL,
+          KEY ix_meetings_team (team_id),
+          CONSTRAINT fk_meetings_team FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
+    'meeting_attendance' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS meeting_attendance (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          meeting_id BIGINT UNSIGNED NOT NULL,
+          user_id BIGINT UNSIGNED NOT NULL,
+          joined_at DATETIME NOT NULL,
+          UNIQUE KEY uq_meeting_attendance (meeting_id, user_id),
+          CONSTRAINT fk_att_meeting FOREIGN KEY (meeting_id) REFERENCES team_meetings (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
 ];
+
+// ---------------------------------------------------------------- migrations
+// Idempotent column additions for installs created before these features.
+$migrations = [
+    'ALTER TABLE users ADD COLUMN first_name VARCHAR(80) DEFAULT NULL AFTER email',
+    'ALTER TABLE users ADD COLUMN last_name VARCHAR(80) DEFAULT NULL AFTER first_name',
+    'ALTER TABLE users ADD COLUMN avatar_file_id BIGINT UNSIGNED DEFAULT NULL AFTER name',
+    'ALTER TABLE users ADD COLUMN last_seen_at DATETIME DEFAULT NULL',
+    'ALTER TABLE teams ADD COLUMN logo_file_id BIGINT UNSIGNED DEFAULT NULL AFTER owner_id',
+    'ALTER TABLE projects ADD COLUMN repo_url VARCHAR(500) DEFAULT NULL AFTER description',
+    'ALTER TABLE tasks ADD COLUMN phase_id BIGINT UNSIGNED DEFAULT NULL AFTER project_id',
+    "ALTER TABLE tasks ADD COLUMN priority ENUM('low','medium','high') NOT NULL DEFAULT 'medium' AFTER title",
+    'ALTER TABLE tasks ADD COLUMN due_date DATE DEFAULT NULL AFTER priority',
+    'ALTER TABLE messages ADD COLUMN reply_to_id BIGINT UNSIGNED DEFAULT NULL AFTER file_id',
+    'ALTER TABLE files MODIFY project_id BIGINT UNSIGNED DEFAULT NULL',
+];
+
+$migrationResults = [];
+foreach ($migrations as $sql) {
+    try {
+        Database::run($sql);
+        $migrationResults[] = true;
+    } catch (Throwable $e) {
+        // 1060 = duplicate column (already applied) — that is fine
+        $code = $e->errorInfo[1] ?? 0;
+        $migrationResults[] = ($code === 1060);
+        if ($code !== 1060) {
+            error_log('[hamkar-install] migration failed: ' . $e->getMessage());
+        }
+    }
+}
 
 $results = [];
 foreach ($tables as $name => $sql) {
@@ -186,8 +277,10 @@ foreach ($results as [$name, $ok, $err]) {
         ? "<li>✅ جدول <code>{$name}</code> آماده است</li>"
         : "<li style='color:#fb7185'>❌ جدول <code>{$name}</code>: " . htmlspecialchars($err, ENT_QUOTES) . '</li>';
 }
-echo '</ul>';
-$allOk = !in_array(false, array_column($results, 1), true);
+echo "<li>✅ {$migOk}/" . count($migrations) . " مایگریشن ستون‌ها اعمال شد</li></ul>";
+$allOk = !in_array(false, array_column($results, 1), true)
+    && !in_array(false, $migrationResults, true);
+$migOk = count(array_filter($migrationResults));
 echo $allOk
     ? '<p style="color:#FCAD38"><b>همه‌چیز آماده است!</b> حالا اکستنشن را از پوشه‌ی <code>extension/</code> در کروم نصب کن.</p>'
     : '<p style="color:#fb7185">یک یا چند جدول ساخته نشد — دسترسی‌های کاربر دیتابیس را چک کن.</p>';

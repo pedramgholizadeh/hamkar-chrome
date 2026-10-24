@@ -73,10 +73,10 @@ final class AuthController
         $token = Auth::createSession($userId);
         Database::run("UPDATE auth_requests SET status = 'used' WHERE id = ?", [$row['id']]);
 
-        $user = Database::one(
-            'SELECT id, email, name, created_at FROM users WHERE id = ?',
+        $user = Shape::user((array) Database::one(
+            'SELECT ' . Shape::USER_COLUMNS . ' FROM users u WHERE u.id = ?',
             [$userId]
-        );
+        ));
         Http::json(['status' => 'approved', 'token' => $token, 'user' => $user]);
     }
 

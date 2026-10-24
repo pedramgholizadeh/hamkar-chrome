@@ -27,11 +27,17 @@ final class Auth
         }
 
         $row = Database::one(
-            'SELECT u.id, u.email, u.name, u.created_at
+            'SELECT ' . Shape::USER_COLUMNS . '
              FROM sessions s JOIN users u ON u.id = s.user_id
              WHERE s.token_hash = ?',
             [hash('sha256', $token)]
         );
+
+        if ($row !== null) {
+            // presence heartbeat — powers online dots in chat and team pages
+            Database::run('UPDATE users SET last_seen_at = UTC_TIMESTAMP() WHERE id = ?', [$row['id']]);
+            $row['last_seen_at'] = gmdate('Y-m-d H:i:s');
+        }
 
         self::$user = $row;
         return $row;

@@ -32,8 +32,9 @@ final class Files
         };
     }
 
-    /** Validate + persist an uploaded file and create its DB row. */
-    public static function store(array $upload, int $projectId, int $uploaderId, int $maxBytes): array
+    /** Validate + persist an uploaded file and create its DB row.
+     *  $projectId may be null for non-project assets (avatars, team logos). */
+    public static function store(array $upload, ?int $projectId, int $uploaderId, int $maxBytes): array
     {
         if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             Http::error(400, 'upload_failed');

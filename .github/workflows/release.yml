@@ -1,0 +1,68 @@
+# Hamkar — automatic extension release
+#
+# • push to master  → packs the extension and (re)publishes the rolling
+#                     "Latest" pre-release, so users can always grab the
+#                     newest zip from the Releases page.
+# • tag  v*         → publishes a versioned release (hamkar-extension-vX.Y.Z.zip).
+# • workflow_dispatch → manual run from the Actions tab.
+
+name: Release
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read extension version
+        id: ver
+        run: echo "version=$(node -p "require('./extension/manifest.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Pack extension zip
+        run: |
+          mkdir -p dist
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            NAME="hamkar-extension-${GITHUB_REF#refs/tags/}"
+          else
+            NAME="hamkar-extension-latest"
+          fi
+          zip -r "dist/${NAME}.zip" extension \
+            -x 'extension/.DS_Store' 'extension/__MACOSX*'
+          echo "zip=dist/${NAME}.zip" >> "$GITHUB_ENV"
+
+      - name: Publish versioned release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: همکار ${{ github.ref_name }}
+          body: |
+            نصب:
+            1. زیپ را دانلود و Extract کنید
+            2. `chrome://extensions` → Developer mode → **Load unpacked**
+            3. پوشه‌ی `extension` را انتخاب کنید
+          files: ${{ env.zip }}
+
+      - name: Publish rolling Latest release
+        if: github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: 'همکار — Latest (v${{ steps.ver.outputs.version }})'
+          prerelease: true
+          body: |
+            آخرین نسخه‌ی اکستنشن همکار از برنچ master — نسخه‌ی v${{ steps.ver.outputs.version }}
+
+            نصب:
+            1. `hamkar-extension-latest.zip` را دانلود و Extract کنید
+            2. `chrome://extensions` → Developer mode → **Load unpacked**
+            3. پوشه‌ی `extension` را انتخاب کنید
+          files: ${{ env.zip }}

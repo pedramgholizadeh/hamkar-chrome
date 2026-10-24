@@ -1,0 +1,17 @@
+# Hamkar API — route everything to the front controller
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Never expose runtime storage (dev mail outbox, logs)
+    RewriteRule ^storage/ - [F,L]
+
+    # Serve real files (assets) directly, everything else -> index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

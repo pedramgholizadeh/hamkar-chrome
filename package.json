@@ -1,0 +1,12 @@
+{
+  "name": "hamkar-chrome",
+  "private": true,
+  "description": "Build tooling for the Hamkar Chrome extension (Tailwind CSS only — the extension itself has zero runtime dependencies)",
+  "scripts": {
+    "build:css": "tailwindcss -i ./extension/assets/css/input.css -o ./extension/assets/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./extension/assets/css/input.css -o ./extension/assets/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -1,0 +1,23 @@
+# ---- Secrets & config (never commit) ----
+server/api/config.php
+scripts/ftp.env
+
+# ---- User uploads & runtime data ----
+server/media/*
+!server/media/.htaccess
+server/api/storage/
+
+# ---- Node / Tailwind build ----
+node_modules/
+extension/build/
+
+# ---- OS / editor noise ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+
+# ---- Packages ----
+extension/*.zip

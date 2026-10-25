@@ -3,39 +3,8 @@
 (function () {
   'use strict';
 
-  // ریویل عناصر هنگام اسکرول
-  var reveals = document.querySelectorAll('.reveal');
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting || entry.boundingClientRect.top < innerHeight) {
-          entry.target.classList.add('is-visible');
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    reveals.forEach(function (el) { io.observe(el); });
-    // شبکه‌ی امن: هر عنصری که در اولین لود بالای viewport است، نمایان شود
-    window.addEventListener('load', function () {
-      reveals.forEach(function (el) {
-        if (el.getBoundingClientRect().top < innerHeight) el.classList.add('is-visible');
-      });
-    });
-    // اگر پرش اسکرول (کلیک منو / کلید End) چیزی را از قلم انداخت، همان‌ها نمایان شوند
-    var failSafe = false;
-    window.addEventListener('scroll', function () {
-      if (failSafe) return;
-      failSafe = true;
-      setTimeout(function () {
-        reveals.forEach(function (el) {
-          if (el.getBoundingClientRect().top < 0) el.classList.add('is-visible');
-        });
-        failSafe = false;
-      }, 250);
-    }, { passive: true });
-  } else {
-    reveals.forEach(function (el) { el.classList.add('is-visible'); });
-  }
+
+  // (انیمیشن reveal حذف شد — محتوا همیشه نمایان است)
 
   // نمایش نسخه‌ی آخرین ریلیز روی دکمه‌های دانلود (اگر گیت‌هاب جواب داد)
   var DL_URL = 'https://github.com/pedramgholizadeh/hamkar-chrome/releases/download/latest/hamkar-extension-latest.zip';

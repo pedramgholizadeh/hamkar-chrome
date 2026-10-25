@@ -132,12 +132,9 @@ html { scroll-behavior: smooth; }
   color: #fcad38; font-weight: 800;
 }
 
-/* ---------- ریویل هنگام اسکرول ---------- */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
-.reveal.is-visible { opacity: 1; transform: none; }
+/* ریویل حذف شد: محتوا همیشه نمایان است تا هیچ‌وقت بخشی خالی دیده نشود */
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
   .blob, .blob-1, .blob-2, .blob-3 { animation: none; }
   html { scroll-behavior: auto; }
 }

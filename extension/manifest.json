@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "همکار — Hamkar",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "فضای کاری تیمی در تب جدید: تیم، پروژه، فاز، نسخه، تسک، اسکیل، جلسه آنلاین و چت",
   "chrome_url_overrides": {
     "newtab": "newtab.html"

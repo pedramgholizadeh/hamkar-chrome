@@ -42,7 +42,7 @@ const Projects = {
 
     Util.byId('main').innerHTML = `
       <div class="flex h-full flex-col">
-        <div class="glass shrink-0 border-x-0 border-t-0 px-5 py-3">
+        <div class="glass relative z-30 shrink-0 border-x-0 border-t-0 px-5 py-3">
           <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
               <h1 class="truncate font-bold text-vanilla">${Util.esc(data.project.name)}</h1>
@@ -53,11 +53,11 @@ const Projects = {
             </div>
             <div class="flex items-center gap-2">
               <div class="flex rounded-xl bg-white/5 p-1 text-xs">
-                <button data-tab="chat" class="rounded-lg px-3 py-1.5 transition">💬 چت</button>
-                <button data-tab="tasks" class="rounded-lg px-3 py-1.5 transition">✅ تسک‌ها</button>
-                <button data-tab="phases" class="rounded-lg px-3 py-1.5 transition">${Util.icon('timeline', 'text-sm')} فازها</button>
-                <button data-tab="versions" class="rounded-lg px-3 py-1.5 transition">${Util.icon('new_releases', 'text-sm')} نسخه‌ها</button>
-                <button data-tab="activity" class="rounded-lg px-3 py-1.5 transition">${Util.icon('history', 'text-sm')} گزارش</button>
+                <button data-tab="chat" class="rounded-lg px-3.5 py-1.5 transition">چت</button>
+                <button data-tab="tasks" class="rounded-lg px-3.5 py-1.5 transition">تسک‌ها</button>
+                <button data-tab="phases" class="rounded-lg px-3.5 py-1.5 transition">فازها</button>
+                <button data-tab="versions" class="rounded-lg px-3.5 py-1.5 transition">نسخه‌ها</button>
+                <button data-tab="activity" class="rounded-lg px-3.5 py-1.5 transition">گزارش</button>
               </div>
               <div class="relative">
                 <button id="project-settings-btn" class="btn-ghost h-9 w-9 px-0 text-cream/50 hover:text-cream" title="تنظیمات پروژه">${Util.icon('tune', 'text-lg')}</button>

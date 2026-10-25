@@ -87,10 +87,23 @@ const Chat = {
       const m = Chat.members.find((x) => x.id === Number(slot.dataset.dmAvatar));
       if (m) slot.innerHTML = await Util.avatarHtml(m, 'h-7 w-7 text-[10px]');
     });
-    col.querySelectorAll('[data-dm]').forEach((btn) =>
+    col.querySelectorAll('[data-dm], [data-dm-btn]').forEach((btn) =>
       btn.addEventListener('click', () => {
-        const m = Chat.members.find((x) => x.id === Number(btn.dataset.dm));
+        const m = Chat.members.find((x) => x.id === Number(btn.dataset.dm || btn.dataset.dmBtn));
         if (m && m.id !== App.state.user.id) Chat.openDm(m);
+      }));
+    col.querySelectorAll('[data-add-friend]').forEach((btn) =>
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const m = Chat.members.find((x) => x.id === Number(btn.dataset.addFriend));
+        if (!m) return;
+        try {
+          await Api.request('friends/request', { method: 'POST', body: { email: m.email } });
+          App.toast('درخواست دوستی برای ' + m.display_name + ' ارسال شد', false);
+          Friends.load();
+        } catch (err) {
+          App.toast(Util.errorFa(err));
+        }
       }));
   },
 

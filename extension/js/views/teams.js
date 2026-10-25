@@ -72,7 +72,7 @@ const Teams = {
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
                   <h1 id="team-title" class="truncate text-xl font-extrabold text-vanilla">${Util.esc(data.team.name)}</h1>
-                  ${isOwner ? `<button id="team-rename-btn" class="btn-ghost h-7 w-7 px-0 text-cream/40"><span class="ms text-base">edit</span></button>` : ''}
+                  ${isOwner ? `<button id="team-rename-btn" class="btn-ghost h-7 px-2 text-cream/40 transition hover:text-cyan" title="تغییر نام تیم"><span class="ms text-base">edit</span><span class="text-[10px]">تغییر نام</span></button>` : ''}
                 </div>
                 <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-cream/40">
                   <span class="chip bg-white/5"><span class="ms text-sm">group</span> ${data.members.length} عضو</span>

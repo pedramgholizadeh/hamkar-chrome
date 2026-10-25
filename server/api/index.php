@@ -112,6 +112,10 @@ Router::add('PATCH', 'tasks/{id}', fn ($p) => TaskController::update($p));
 Router::add('GET', 'projects/{id}/messages', fn ($p) => ChatController::messages($p));
 Router::add('POST', 'projects/{id}/messages', fn ($p) => ChatController::send($p, $config));
 
+// auto-update proxy (public — the extension polls it instead of GitHub)
+Router::add('GET', 'update/latest', fn ($p) => UpdateController::latest());
+Router::add('GET', 'update/download', fn ($p) => UpdateController::download());
+
 // media (private, authenticated streaming)
 Router::add('GET', 'media/{id}', fn ($p) => MediaController::get($p));
 

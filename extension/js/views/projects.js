@@ -51,16 +51,18 @@ const Projects = {
                 <span id="repo-chip"></span>
               </div>
             </div>
-            <div class="flex shrink-0 rounded-xl bg-white/5 p-1 text-xs">
-              <button data-tab="chat" class="rounded-lg px-3 py-1.5 transition">💬 چت</button>
-              <button data-tab="tasks" class="rounded-lg px-3 py-1.5 transition">✅ تسک‌ها</button>
-              <button data-tab="phases" class="rounded-lg px-3 py-1.5 transition">${Util.icon('timeline', 'text-sm')} فازها</button>
-              <button data-tab="versions" class="rounded-lg px-3 py-1.5 transition">${Util.icon('new_releases', 'text-sm')} نسخه‌ها</button>
-              <button data-tab="activity" class="rounded-lg px-3 py-1.5 transition">${Util.icon('history', 'text-sm')} گزارش</button>
-            </div>
-            <div class="relative">
-              <button id="project-settings-btn" class="btn-ghost h-8 w-8 px-0 text-cream/50 hover:text-cream" title="تنظیمات پروژه">${Util.icon('tune', 'text-lg')}</button>
-              <div id="project-settings-menu" class="absolute left-0 top-10 z-40 hidden w-56 overflow-hidden rounded-xl border border-white/10 bg-navy/95 p-1 shadow-2xl shadow-black/50 backdrop-blur-2xl"></div>
+            <div class="flex items-center gap-2">
+              <div class="flex rounded-xl bg-white/5 p-1 text-xs">
+                <button data-tab="chat" class="rounded-lg px-3 py-1.5 transition">💬 چت</button>
+                <button data-tab="tasks" class="rounded-lg px-3 py-1.5 transition">✅ تسک‌ها</button>
+                <button data-tab="phases" class="rounded-lg px-3 py-1.5 transition">${Util.icon('timeline', 'text-sm')} فازها</button>
+                <button data-tab="versions" class="rounded-lg px-3 py-1.5 transition">${Util.icon('new_releases', 'text-sm')} نسخه‌ها</button>
+                <button data-tab="activity" class="rounded-lg px-3 py-1.5 transition">${Util.icon('history', 'text-sm')} گزارش</button>
+              </div>
+              <div class="relative">
+                <button id="project-settings-btn" class="btn-ghost h-9 w-9 px-0 text-cream/50 hover:text-cream" title="تنظیمات پروژه">${Util.icon('tune', 'text-lg')}</button>
+                <div id="project-settings-menu" class="absolute left-0 top-11 z-40 hidden w-56 overflow-hidden rounded-xl border border-white/10 bg-navy/95 p-1 shadow-2xl shadow-black/50 backdrop-blur-2xl"></div>
+              </div>
             </div>
           </div>
           <div id="project-progress" class="mt-2"></div>

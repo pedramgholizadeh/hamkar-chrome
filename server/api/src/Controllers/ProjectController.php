@@ -10,7 +10,8 @@ final class ProjectController
         $user = Auth::requireUser();
         $projects = Database::all(
             'SELECT p.id, p.owner_id, p.team_id, p.name, p.description, p.created_at,
-                    GROUP_CONCAT(DISTINCT t.name SEPARATOR "، ") AS team_name
+                    GROUP_CONCAT(DISTINCT t.name SEPARATOR "، ") AS team_name,
+                    (SELECT GROUP_CONCAT(pt2.team_id) FROM project_teams pt2 WHERE pt2.project_id = p.id) AS team_ids
              FROM projects p
              LEFT JOIN project_teams pt ON pt.project_id = p.id
              LEFT JOIN teams t ON t.id = pt.team_id

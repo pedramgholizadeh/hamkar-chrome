@@ -275,6 +275,11 @@ const Updater = {
       return null;
     }
   },
+
+  open() {
+    window.open(CONFIG.API_BASE + '/update/download', '_blank');
+    App.toast('زیپ جدید دانلود شد — Extract کن، پوشه را جایگزین کن و در chrome://extensions دکمه‌ی Reload را بزن. دیتا سمت سرور است و هیچ‌چیز از دست نمی‌رود', false);
+  },
 };
 
 // ───────────────────── join project by invite code ─────────────────────
@@ -318,10 +323,7 @@ Updater.check().then(async (info) => {
   if (info && info.isNew) {
     update.classList.remove('hidden');
     update.classList.add('inline-flex');
-    Util.byId('version-chip').onclick = () => {
-      window.open(info.url, '_blank');
-      App.toast('زیپ جدید را دانلود، پوشه را جایگزین و اکستنشن را Reload کن — دیتا سرور جاست و چیزی از دست نمی‌ره', false);
-    };
+    Util.byId('version-chip').onclick = () => Updater.open();
   }
 });
 

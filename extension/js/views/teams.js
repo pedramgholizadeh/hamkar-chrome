@@ -116,7 +116,10 @@ const Teams = {
 
           <!-- team projects -->
           <div class="panel col-span-6 p-5">
-            <h2 class="mb-3 flex items-center gap-1.5 text-sm font-bold text-vanilla"><span class="ms text-base text-cyan">folder_shared</span> پروژه‌های تیم</h2>
+            <div class="mb-3 flex items-center justify-between">
+              <h2 class="flex items-center gap-1.5 text-sm font-bold text-vanilla"><span class="ms text-base text-cyan">folder_shared</span> پروژه‌های تیم</h2>
+              <button id="team-add-project" class="btn-soft h-8 text-xs">${Util.icon('add', 'text-base')} افزودن پروژه</button>
+            </div>
             <div id="team-projects" class="grid grid-cols-3 gap-2"></div>
           </div>
 
@@ -138,6 +141,7 @@ const Teams = {
 
     Teams.loadActivity(teamId);
     Teams.renderTeamProjects(teamId, data.projects || []);
+    Util.byId('team-add-project').addEventListener('click', () => Teams.addExistingProject(teamId, data.projects || []));
     Teams.paintPageLogo();
     Teams.renderMembers(data.members);
     Teams.loadMeetings(teamId);
@@ -205,6 +209,32 @@ const Teams = {
         App.toast(Util.errorFa(err));
       }
       e.target.value = '';
+    });
+  },
+
+  /** Attach one of my existing projects to this team. */
+  addExistingProject(teamId, teamProjects) {
+    const inTeam = new Set(teamProjects.map((p) => p.id));
+    const candidates = App.state.projects.filter((p) => p.owner_id === App.state.user.id && !inTeam.has(p.id));
+    if (!candidates.length) {
+      App.toast('پروژه‌ای از تو باقی نمانده — همه‌ی پروژه‌هایت این‌جا هستند یا مالِ دیگران است');
+      return;
+    }
+    App.modal({
+      title: 'افزودن پروژه به تیم',
+      fields: [{
+        name: 'project_id', label: 'از پروژه‌های موجود انتخاب کن', type: 'select',
+        options: candidates.map((p) => ({ value: p.id, label: p.name })),
+      }],
+      submitLabel: 'افزودن به تیم',
+      onSubmit: async (v) => {
+        const project = await Api.request('projects/' + v.project_id);
+        const teamIds = String(project.project.team_ids || '').split(',').filter(Boolean).map(Number);
+        if (!teamIds.includes(teamId)) teamIds.push(teamId);
+        await Api.request('projects/' + v.project_id, { method: 'PATCH', body: { team_ids: teamIds } });
+        App.toast('پروژه به تیم اضافه شد', false);
+        Teams.open(teamId);
+      },
     });
   },
 

@@ -19,14 +19,14 @@ final class FriendController
             FROM users u
             LEFT JOIN friendships f
               ON f.status = 'accepted'
-             AND ((f.requester_id = :me AND f.addressee_id = u.id) OR (f.addressee_id = :me AND f.requester_id = u.id))
+             AND ((f.requester_id = ? AND f.addressee_id = u.id) OR (f.addressee_id = ? AND f.requester_id = u.id))
             WHERE (f.id IS NOT NULL
                OR u.id IN (SELECT tm2.user_id FROM team_members tm1
                            JOIN team_members tm2 ON tm1.team_id = tm2.team_id
-                           WHERE tm1.user_id = :me AND tm2.user_id <> u.id))
-              AND u.id <> :me
+                           WHERE tm1.user_id = ? AND tm2.user_id <> u.id))
+              AND u.id <> ?
             ORDER BY u.email",
-            ['me' => $id]
+            [$id, $id, $id, $id]
         ));
 
         $incoming = array_map([self::class, 'friendShape'], Database::all(

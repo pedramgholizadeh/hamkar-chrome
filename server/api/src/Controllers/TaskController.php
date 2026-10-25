@@ -37,6 +37,8 @@ final class TaskController
              VALUES (?, ?, ?, ?, ?, ?, ?, 0, UTC_TIMESTAMP())',
             [$project['id'], $title, $assigneeId, $user['id'], $phaseId, $priority, $dueDate]
         );
+        Activity::write('project', (int) $project['id'], (int) $user['id'], 'task_created',
+            'تسک «' . $title . '» ساخته شد');
 
         Http::json(['ok' => true, 'tasks' => self::allFor((int) $project['id'])]);
     }
@@ -57,6 +59,8 @@ final class TaskController
                 'UPDATE tasks SET done = ?, done_at = ? WHERE id = ?',
                 [$done ? 1 : 0, $done ? gmdate('Y-m-d H:i:s') : null, $task['id']]
             );
+            Activity::write('project', (int) $project['id'], (int) $user['id'], $done ? 'task_done' : 'task_reopened',
+                ($done ? 'تسک «' : 'تسک «') . $task['title'] . '» ' . ($done ? 'انجام شد' : 'به حالت باز برگشت'));
         }
         if (isset($body['title'])) {
             $title = trim((string) $body['title']);
@@ -140,15 +144,6 @@ final class TaskController
 
     private static function canAssign(array $project, int $userId): bool
     {
-        if ((int) $project['owner_id'] === $userId) {
-            return true;
-        }
-        if ($project['team_id'] !== null && Auth::isTeamMember((int) $project['team_id'], $userId)) {
-            return true;
-        }
-        return Database::one(
-            'SELECT id FROM project_members WHERE project_id = ? AND user_id = ?',
-            [$project['id'], $userId]
-        ) !== null;
+        return Auth::canAccessProject($project, $userId);
     }
 }

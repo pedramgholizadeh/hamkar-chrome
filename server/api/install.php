@@ -264,6 +264,29 @@ $tables = [
           CONSTRAINT fk_pm_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL,
+    'project_teams' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS project_teams (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          project_id BIGINT UNSIGNED NOT NULL,
+          team_id BIGINT UNSIGNED NOT NULL,
+          UNIQUE KEY uq_project_team (project_id, team_id),
+          CONSTRAINT fk_pt_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
+          CONSTRAINT fk_pt_team FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
+    'activity_logs' => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS activity_logs (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          scope_type ENUM('team','project') NOT NULL,
+          scope_id BIGINT UNSIGNED NOT NULL,
+          user_id BIGINT UNSIGNED NOT NULL,
+          action VARCHAR(60) NOT NULL,
+          detail VARCHAR(500) DEFAULT NULL,
+          created_at DATETIME NOT NULL,
+          KEY ix_activity_scope (scope_type, scope_id, id),
+          CONSTRAINT fk_act_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL,
     'password_setups' => <<<'SQL'
         CREATE TABLE IF NOT EXISTS password_setups (
           id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -285,6 +308,7 @@ $migrations = [
     'ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) DEFAULT NULL AFTER email',
     'ALTER TABLE projects ADD COLUMN invite_code CHAR(10) DEFAULT NULL AFTER team_id',
     'ALTER TABLE projects ADD UNIQUE KEY uq_projects_code (invite_code)',
+    'INSERT IGNORE INTO project_teams (project_id, team_id) SELECT id, team_id FROM projects WHERE team_id IS NOT NULL',
     'ALTER TABLE users ADD COLUMN last_name VARCHAR(80) DEFAULT NULL AFTER first_name',
     'ALTER TABLE users ADD COLUMN avatar_file_id BIGINT UNSIGNED DEFAULT NULL AFTER name',
     'ALTER TABLE users ADD COLUMN last_seen_at DATETIME DEFAULT NULL',
@@ -303,9 +327,9 @@ foreach ($migrations as $sql) {
         Database::run($sql);
         $migrationResults[] = true;
     } catch (Throwable $e) {
-        // 1060 = duplicate column (already applied) — that is fine
+        // 1060 = duplicate column, 1061 = duplicate key name (already applied) — fine
         $code = $e->errorInfo[1] ?? 0;
-        $migrationResults[] = ($code === 1060);
+        $migrationResults[] = in_array($code, [1060, 1061], true);
         if ($code !== 1060) {
             error_log('[hamkar-install] migration failed: ' . $e->getMessage());
         }
@@ -341,10 +365,10 @@ foreach ($results as [$name, $ok, $err]) {
         ? "<li>✅ جدول <code>{$name}</code> آماده است</li>"
         : "<li style='color:#fb7185'>❌ جدول <code>{$name}</code>: " . htmlspecialchars($err, ENT_QUOTES) . '</li>';
 }
-echo "<li>✅ {$migOk}/" . count($migrations) . " مایگریشن ستون‌ها اعمال شد</li></ul>";
+$migOk = count(array_filter($migrationResults));
 $allOk = !in_array(false, array_column($results, 1), true)
     && !in_array(false, $migrationResults, true);
-$migOk = count(array_filter($migrationResults));
+echo "<li>✅ {$migOk}/" . count($migrations) . " مایگریشن ستون‌ها اعمال شد</li></ul>";
 echo $allOk
     ? '<p style="color:#FCAD38"><b>همه‌چیز آماده است!</b> حالا اکستنشن را از پوشه‌ی <code>extension/</code> در کروم نصب کن.</p>'
     : '<p style="color:#fb7185">یک یا چند جدول ساخته نشد — دسترسی‌های کاربر دیتابیس را چک کن.</p>';

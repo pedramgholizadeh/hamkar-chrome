@@ -246,3 +246,27 @@ CREATE TABLE IF NOT EXISTS project_members (
   CONSTRAINT fk_pm_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
   CONSTRAINT fk_pm_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────── v0.5 additions ───────────────────────────
+-- projects may belong to multiple teams (project_teams); user activity log
+
+CREATE TABLE IF NOT EXISTS project_teams (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  project_id BIGINT UNSIGNED NOT NULL,
+  team_id BIGINT UNSIGNED NOT NULL,
+  UNIQUE KEY uq_project_team (project_id, team_id),
+  CONSTRAINT fk_pt_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
+  CONSTRAINT fk_pt_team FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  scope_type ENUM('team','project') NOT NULL,
+  scope_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  action VARCHAR(60) NOT NULL,
+  detail VARCHAR(500) DEFAULT NULL,
+  created_at DATETIME NOT NULL,
+  KEY ix_activity_scope (scope_type, scope_id, id),
+  CONSTRAINT fk_act_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

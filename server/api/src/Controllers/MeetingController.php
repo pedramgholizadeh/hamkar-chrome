@@ -57,6 +57,7 @@ final class MeetingController
             "INSERT INTO team_meetings (team_id, created_by, title, url, status, created_at) VALUES (?, ?, ?, ?, 'active', UTC_TIMESTAMP())",
             [$teamId, $user['id'], $title !== '' ? $title : null, $url]
         );
+        Activity::write('team', $teamId, (int) $user['id'], 'meeting_started', 'جلسه آنلاین شروع کرد');
         Http::json(['ok' => true, 'meeting' => self::shape((array) Database::one(
             'SELECT m.*, ' . str_replace('u.', 'cu.', Shape::USER_COLUMNS) . ' FROM team_meetings m JOIN users cu ON cu.id = m.created_by WHERE m.id = ?',
             [$id]
@@ -101,6 +102,7 @@ final class MeetingController
             "UPDATE team_meetings SET status = 'ended', ended_at = UTC_TIMESTAMP() WHERE id = ?",
             [$meeting['id']]
         );
+        Activity::write('team', (int) $meeting['team_id'], (int) $user['id'], 'meeting_ended', 'جلسه آنلاین را پایان داد');
         Http::json(['ok' => true]);
     }
 

@@ -52,6 +52,36 @@ const Util = {
     }
   },
 
+  /** Persian relative last-seen: آنلاین / ۲۳ دقیقه پیش / … */
+  lastSeenFa(iso) {
+    if (!iso) return 'آخرین بازدید نامشخص';
+    const diff = Math.floor((Date.now() - new Date(iso.replace(' ', 'T') + 'Z').getTime()) / 1000);
+    if (diff < 90) return 'آنلاین';
+    const fa = (n) => Number(n).toLocaleString('fa-IR');
+    if (diff < 3600) return 'آخرین بازید ' + fa(Math.max(2, Math.ceil(diff / 60))) + ' دقیقه پیش';
+    if (diff < 86400) return 'آخرین بازدید ' + fa(Math.floor(diff / 3600)) + ' ساعت پیش';
+    if (diff < 172800) return 'آخرین بازدید دیروز';
+    return 'آخرین بازدید ' + Util.dateFa(iso);
+  },
+
+  isOnline(iso) {
+    if (!iso) return false;
+    return (Date.now() - new Date(iso.replace(' ', 'T') + 'Z').getTime()) < 90 * 1000;
+  },
+
+  activityIcon(action) {
+    const map = {
+      project_created: 'flag', project_updated: 'edit', project_deleted: 'delete_forever',
+      project_added: 'add_link', project_removed: 'link_off', member_joined: 'person_add',
+      member_left: 'person_remove', member_invited: 'send', team_created: 'group_add',
+      team_updated: 'edit', task_created: 'add_task', task_done: 'task_alt', task_reopened: 'radio_button_unchecked',
+      phase_created: 'timeline', phase_deleted: 'timeline', version_released: 'new_releases',
+      version_deleted: 'new_releases', code_rotated: 'key', meeting_started: 'videocam',
+      meeting_ended: 'videocam_off', skill_created: 'description', skill_deleted: 'description',
+    };
+    return map[action] || 'history';
+  },
+
   bytes(n) {
     const num = Number(n) || 0;
     if (num < 1024) return num + ' B';

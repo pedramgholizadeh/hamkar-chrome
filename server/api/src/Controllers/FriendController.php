@@ -13,25 +13,31 @@ final class FriendController
         $me = Auth::requireUser();
         $id = (int) $me['id'];
 
+        // friends = accepted friendships ∪ teammates (available by default)
         $friends = array_map([self::class, 'friendShape'], Database::all(
-            "(SELECT f.id AS friendship_id, 'accepted' AS fr_status, 'requester' AS my_side, " . self::USERSEL . "
-              FROM friendships f JOIN users u ON u.id = f.addressee_id WHERE f.requester_id = ? AND f.status = 'accepted')
-             UNION ALL
-             (SELECT f.id, 'accepted', 'addressee', " . self::USERSEL . "
-              FROM friendships f JOIN users u ON u.id = f.requester_id WHERE f.addressee_id = ? AND f.status = 'accepted')
-             ORDER BY 3",
-            [$id, $id]
+            "SELECT f.id AS friendship_id, 'accepted' AS fr_status, 1 AS is_friend, " . self::USERSEL . "
+            FROM users u
+            LEFT JOIN friendships f
+              ON f.status = 'accepted'
+             AND ((f.requester_id = :me AND f.addressee_id = u.id) OR (f.addressee_id = :me AND f.requester_id = u.id))
+            WHERE (f.id IS NOT NULL
+               OR u.id IN (SELECT tm2.user_id FROM team_members tm1
+                           JOIN team_members tm2 ON tm1.team_id = tm2.team_id
+                           WHERE tm1.user_id = :me AND tm2.user_id <> u.id))
+              AND u.id <> :me
+            ORDER BY u.email",
+            ['me' => $id]
         ));
 
         $incoming = array_map([self::class, 'friendShape'], Database::all(
-            'SELECT f.id AS friendship_id, \'incoming\' AS fr_status, \'addressee\' AS my_side, ' . self::USERSEL . '
+            'SELECT f.id AS friendship_id, \'incoming\' AS fr_status, 0 AS is_friend, ' . self::USERSEL . '
              FROM friendships f JOIN users u ON u.id = f.requester_id
              WHERE f.addressee_id = ? AND f.status = \'pending\' ORDER BY f.id DESC',
             [$id]
         ));
 
         $outgoing = array_map([self::class, 'friendShape'], Database::all(
-            'SELECT f.id AS friendship_id, \'outgoing\' AS fr_status, \'requester\' AS my_side, ' . self::USERSEL . '
+            'SELECT f.id AS friendship_id, \'outgoing\' AS fr_status, 0 AS is_friend, ' . self::USERSEL . '
              FROM friendships f JOIN users u ON u.id = f.addressee_id
              WHERE f.requester_id = ? AND f.status = \'pending\' ORDER BY f.id DESC',
             [$id]
@@ -196,6 +202,14 @@ final class FriendController
         ]]);
     }
 
+    /** Lightweight presence ping from the open extension page. */
+    public static function presence(): void
+    {
+        $me = Auth::requireUser();
+        Database::run('UPDATE users SET last_seen_at = UTC_TIMESTAMP() WHERE id = ?', [$me['id']]);
+        Http::json(['ok' => true, 'time' => gmdate('c')]);
+    }
+
     // ------------------------------------------------------------- helpers
 
     private const USERSEL = 'u.id, u.email, u.first_name, u.last_name, u.name, u.avatar_file_id, u.last_seen_at';
@@ -204,8 +218,9 @@ final class FriendController
     {
         $user = Shape::user($r);
         return [
-            'friendship_id' => (int) $r['friendship_id'],
+            'friendship_id' => isset($r['friendship_id']) && $r['friendship_id'] !== null ? (int) $r['friendship_id'] : null,
             'status' => $r['fr_status'],
+            'is_friend' => (bool) ($r['is_friend'] ?? false),
             'user' => $user,
         ];
     }

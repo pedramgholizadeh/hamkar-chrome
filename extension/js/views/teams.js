@@ -105,6 +105,15 @@ const Teams = {
             </form>
           </div>
 
+          <!-- recent activity -->
+          <div class="panel col-span-6 p-5">
+            <div class="mb-3 flex items-center justify-between">
+              <h2 class="flex items-center gap-1.5 text-sm font-bold text-vanilla"><span class="ms text-base text-accent">history</span> فعالیت‌های اخیر تیم</h2>
+              <button id="team-activity-all" class="btn-ghost h-7 text-[11px] text-cream/40">مشاهده همه</button>
+            </div>
+            <div id="team-activity" class="space-y-1.5"><p class="py-3 text-center text-xs text-cream/30">در حال بارگذاری…</p></div>
+          </div>
+
           <!-- team projects -->
           <div class="panel col-span-6 p-5">
             <h2 class="mb-3 flex items-center gap-1.5 text-sm font-bold text-vanilla"><span class="ms text-base text-cyan">folder_shared</span> پروژه‌های تیم</h2>
@@ -127,6 +136,7 @@ const Teams = {
         </div>
       </div>`;
 
+    Teams.loadActivity(teamId);
     Teams.renderTeamProjects(teamId, data.projects || []);
     Teams.paintPageLogo();
     Teams.renderMembers(data.members);
@@ -196,6 +206,26 @@ const Teams = {
       }
       e.target.value = '';
     });
+  },
+
+  async loadActivity(teamId) {
+    const box = Util.byId('team-activity');
+    if (!box) return;
+    try {
+      const data = await Api.request(`teams/${teamId}/activity`);
+      const rows = data.activities.slice(0, 6);
+      box.innerHTML = rows.length ? rows.map((a) => Projects.activityRow(a)).join('')
+        : '<p class="py-3 text-center text-xs text-cream/30">هنوز فعالیتی ثبت نشده</p>';
+      Util.byId('team-activity-all').onclick = () => {
+        App.modal({
+          title: 'فعالیت‌های تیم',
+          customBody: `<div class="max-h-[55vh] space-y-1 overflow-y-auto pe-1">${data.activities.map((a) => Projects.activityRow(a)).join('') || '<p class="py-4 text-center text-xs text-cream/30">خالی است</p>'}</div>`,
+          onSubmit: async () => {},
+        });
+      };
+    } catch {
+      box.innerHTML = '';
+    }
   },
 
   renderTeamProjects(teamId, projects) {

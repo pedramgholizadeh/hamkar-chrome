@@ -71,7 +71,8 @@ const Friends = {
         <div class="min-w-0 flex-1">
           <p class="flex items-center gap-1.5 truncate text-sm font-medium">
             ${Util.esc(f.user.display_name)}
-            <span class="h-1.5 w-1.5 rounded-full ${f.user.online ? 'bg-mint' : 'bg-cream/20'}"></span>
+            <span class="chip ${f.user.online ? 'bg-mint/15 text-mint' : 'bg-white/5 text-cream/40'}">${f.user.online ? 'آنلاین' : Util.lastSeenFa(f.user.last_seen_at)}</span>
+            ${!f.is_friend ? '<span class="chip bg-cyan/15 text-cyan">هم‌تیمی</span>' : ''}
           </p>
           <p class="truncate text-[11px] text-cream/35">${Util.esc(f.user.email)}</p>
         </div>
@@ -242,7 +243,7 @@ const Friends = {
           <span id="dm-friend-avatar"></span>
           <div class="min-w-0">
             <p class="truncate text-sm font-bold text-vanilla">${Util.esc(user.display_name)}</p>
-            <p class="text-[10px] ${user.online ? 'text-mint' : 'text-cream/35'}">${user.online ? 'آنلاین' : 'آفلاین'} · ${Util.esc(user.email || '')}</p>
+            <p class="text-[10px] ${user.online ? 'text-mint' : 'text-cream/35'}">${Util.lastSeenFa(user.last_seen_at)} · ${Util.esc(user.email || '')}</p>
           </div>
           <span class="chip ms-auto bg-white/5 text-cream/40">چت خصوصی</span>
         </div>

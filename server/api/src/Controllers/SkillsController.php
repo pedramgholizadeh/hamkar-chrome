@@ -45,6 +45,7 @@ final class SkillsController
             'INSERT INTO skills (team_id, owner_id, title, content, created_at, updated_at) VALUES (?, ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())',
             [$teamId, $user['id'], $title, $content]
         );
+        Activity::write('team', $teamId, (int) $user['id'], 'skill_created', 'اسکیل «' . $title . '» را به اشتراک گذاشت');
         Http::json(['ok' => true, 'skill' => self::row($id)]);
     }
 
@@ -91,6 +92,7 @@ final class SkillsController
             Http::error(403, 'forbidden');
         }
         Database::run('DELETE FROM skills WHERE id = ?', [$skill['id']]);
+        Activity::write('team', (int) $skill['team_id'], (int) $user['id'], 'skill_deleted', 'اسکیل «' . $skill['title'] . '» حذف شد');
         Http::json(['ok' => true]);
     }
 

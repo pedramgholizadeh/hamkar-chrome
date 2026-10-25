@@ -13,6 +13,7 @@ require __DIR__ . '/src/Http.php';
 require __DIR__ . '/src/Router.php';
 require __DIR__ . '/src/Database.php';
 require __DIR__ . '/src/Shape.php';
+require __DIR__ . '/src/Activity.php';
 require __DIR__ . '/src/Auth.php';
 require __DIR__ . '/src/Mailer.php';
 require __DIR__ . '/src/Files.php';
@@ -77,6 +78,7 @@ Router::add('POST', 'meetings/{id}/end', fn ($p) => MeetingController::end($p));
 
 // friends & private DM
 Router::add('GET', 'friends', fn ($p) => FriendController::index());
+Router::add('POST', 'presence', fn ($p) => FriendController::presence());
 Router::add('POST', 'friends/request', fn ($p) => FriendController::request());
 Router::add('POST', 'friends/{id}/accept', fn ($p) => FriendController::accept($p));
 Router::add('DELETE', 'friends/{id}', fn ($p) => FriendController::remove($p));
@@ -97,6 +99,9 @@ Router::add('DELETE', 'versions/{id}', fn ($p) => ProjectController::deleteVersi
 Router::add('DELETE', 'projects/{id}', fn ($p) => ProjectController::destroy($p));
 Router::add('POST', 'projects/{id}/code', fn ($p) => ProjectController::rotateCode($p));
 Router::add('POST', 'projects/join', fn ($p) => ProjectController::joinByCode());
+Router::add('POST', 'projects/{id}/leave', fn ($p) => ProjectController::leave($p));
+Router::add('GET', 'projects/{id}/activity', fn ($p) => ActivityController::forProject($p));
+Router::add('GET', 'teams/{id}/activity', fn ($p) => ActivityController::forTeam($p));
 
 // tasks
 Router::add('GET', 'projects/{id}/tasks', fn ($p) => TaskController::listForProject($p));

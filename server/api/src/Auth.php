@@ -79,13 +79,16 @@ final class Auth
         if ((int) $project['owner_id'] === $userId) {
             return true;
         }
-        if ($project['team_id'] !== null && self::isTeamMember((int) $project['team_id'], $userId)) {
-            return true;
-        }
         return Database::one(
-            'SELECT id FROM project_members WHERE project_id = ? AND user_id = ?',
+            'SELECT pt.id FROM project_teams pt
+             JOIN team_members tm ON tm.team_id = pt.team_id
+             WHERE pt.project_id = ? AND tm.user_id = ? LIMIT 1',
             [$project['id'], $userId]
-        ) !== null;
+        ) !== null
+            || Database::one(
+                'SELECT id FROM project_members WHERE project_id = ? AND user_id = ?',
+                [$project['id'], $userId]
+            ) !== null;
     }
 
     /** Fetch a project after checking access, or fail with 404/403. */

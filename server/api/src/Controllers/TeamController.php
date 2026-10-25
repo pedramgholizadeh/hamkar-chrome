@@ -34,6 +34,7 @@ final class TeamController
             "INSERT IGNORE INTO team_members (team_id, user_id, role, joined_at) VALUES (?, ?, 'owner', UTC_TIMESTAMP())",
             [$teamId, $user['id']]
         );
+        Activity::write('team', $teamId, (int) $user['id'], 'team_created', 'تیم «' . $name . '» ساخته شد');
 
         Http::json(['ok' => true, 'team' => self::row($teamId)]);
     }
@@ -51,10 +52,13 @@ final class TeamController
             Http::error(404, 'invite_code_invalid');
         }
 
-        Database::run(
+        $inserted = Database::insert(
             "INSERT IGNORE INTO team_members (team_id, user_id, role, joined_at) VALUES (?, ?, 'member', UTC_TIMESTAMP())",
             [$team['id'], $user['id']]
         );
+        if ($inserted > 0) {
+            Activity::write('team', (int) $team['id'], (int) $user['id'], 'member_joined', 'با کد دعوت به تیم پیوست');
+        }
         Http::json(['ok' => true, 'team' => $team]);
     }
 
@@ -82,7 +86,9 @@ final class TeamController
             )
         );
         $projects = Database::all(
-            'SELECT id, name, created_at FROM projects WHERE team_id = ? ORDER BY id DESC',
+            'SELECT p.id, p.name, p.created_at FROM project_teams pt
+             JOIN projects p ON p.id = pt.project_id
+             WHERE pt.team_id = ? ORDER BY p.id DESC',
             [$teamId]
         );
         Http::json(['ok' => true, 'team' => $team, 'members' => $members, 'projects' => $projects]);
@@ -100,6 +106,7 @@ final class TeamController
             Http::error(422, 'invalid_name');
         }
         Database::run('UPDATE teams SET name = ? WHERE id = ?', [$name, $teamId]);
+        Activity::write('team', $teamId, (int) $user['id'], 'team_updated', 'نام تیم به «' . $name . '» تغییر کرد');
         Http::json(['ok' => true, 'team' => self::row($teamId)]);
     }
 
@@ -161,6 +168,7 @@ final class TeamController
              ON DUPLICATE KEY UPDATE status = 'pending', invited_by = VALUES(invited_by), created_at = UTC_TIMESTAMP()",
             [$teamId, $email, $user['id']]
         );
+        Activity::write('team', $teamId, (int) $user['id'], 'member_invited', 'کاربر ' . $email . ' به تیم دعوت شد');
         Http::json(['ok' => true]);
     }
 
@@ -194,6 +202,7 @@ final class TeamController
             "INSERT IGNORE INTO team_members (team_id, user_id, role, joined_at) VALUES (?, ?, 'member', UTC_TIMESTAMP())",
             [$invite['team_id'], $user['id']]
         );
+        Activity::write('team', (int) $invite['team_id'], (int) $user['id'], 'member_joined', 'دعوت را پذیرفت و به تیم پیوست');
         Http::json(['ok' => true]);
     }
 

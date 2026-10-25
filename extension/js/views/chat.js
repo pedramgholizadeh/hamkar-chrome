@@ -77,6 +77,7 @@ const Chat = {
             <span data-dm-avatar="${m.id}" class="relative shrink-0"></span>
             <span class="min-w-0 flex-1">
               <span class="block truncate text-xs font-medium">${m.id === App.state.user.id ? 'من' : Util.esc(m.display_name)}</span>
+              <span class="block truncate text-[10px] ${m.online ? 'text-mint' : 'text-cream/30'}">${m.id === App.state.user.id ? 'آنلاین' : Util.lastSeenFa(m.last_seen_at)}</span>
             </span>
             <span class="ms text-sm ${m.id === App.state.user.id ? 'hidden' : 'text-cream/30'}">chat_bubble</span>
           </button>`).join('')}
@@ -138,15 +139,18 @@ const Chat = {
 
   // ------------------------------------------------------------- plumbing
 
+  /** Messages scroll on top, composer pinned to the very bottom. */
   composerHtml() {
     return `
-      <form id="chat-form" class="glass mt-auto flex shrink-0 items-end gap-2 border-x-0 border-b-0 p-3">
+      <div id="chat-messages" class="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-4"></div>
+      <form id="chat-form" class="glass flex shrink-0 items-center gap-2 border-x-0 border-b-0 p-3">
         <input type="file" id="chat-file" class="hidden" />
-        <button type="button" id="chat-attach" class="btn-ghost text-xl" title="پیوست فایل">${Util.icon('attach_file', 'text-2xl')}</button>
-        <textarea id="chat-input" rows="1" placeholder="پیام…" class="input max-h-32 min-h-[42px] flex-1 resize-none py-2.5"></textarea>
-        <button type="submit" class="btn-primary shrink-0">${Util.icon('send', 'text-base')}</button>
-      </form>
-      <div id="chat-messages" class="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-4"></div>`;
+        <button type="button" id="chat-attach" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-cream/50 transition hover:bg-white/10 hover:text-cream" title="پیوست فایل">${Util.icon('attach_file', 'text-2xl')}</button>
+        <textarea id="chat-input" rows="1" placeholder="پیامت را بنویس…" class="input max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl py-3"></textarea>
+        <button type="submit" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-accent to-accent/70 text-white shadow-lg shadow-accent/25 transition hover:brightness-110 active:scale-95" title="ارسال">
+          ${Util.icon('send', 'ms-fill text-xl')}
+        </button>
+      </form>`;
   },
 
   mountComposer(isActive) {
@@ -299,23 +303,15 @@ const Chat = {
       <p class="mb-0.5 px-1 text-[11px] font-bold text-cyan">${Util.esc(m.user.display_name)}</p>` : '';
 
     // RTL flex: row start = RIGHT edge. Own bubble packed right (default),
-    // others packed left (justify-end); their avatar sits on the outer edge.
+    // others packed left (justify-end). No avatars — name keeps it clean.
     parts.push(`
-      <div class="group flex items-end gap-2 ${mine ? '' : 'justify-end'}" data-msg="${m.id}">
+      <div class="flex items-end ${mine ? '' : 'justify-end'}" data-msg="${m.id}">
         <div class="max-w-[85%] min-w-0">
           ${headHtml}
           <div class="${bubbleCls} ${tailCls} px-3.5 py-2.5">${content}</div>
           <p class="mt-0.5 px-1 text-[9px] text-cream/30 ${mine ? 'text-left' : 'text-right'}">${Util.timeFa(m.created_at)}</p>
         </div>
-        ${!mine && !grouped ? `<span data-chat-avatar="${m.id}" class="shrink-0 self-end"></span>` : ''}
       </div>`);
-
-    if (!mine && !grouped) {
-      setTimeout(async () => {
-        const slot = Util.byId('chat-messages')?.querySelector(`[data-chat-avatar="${m.id}"]`);
-        if (slot) slot.innerHTML = await Util.avatarHtml(m.user, 'h-8 w-8 text-[10px]');
-      }, 0);
-    }
 
     return parts.join('');
   },

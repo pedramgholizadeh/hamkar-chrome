@@ -56,6 +56,11 @@ const Projects = {
               <button data-tab="tasks" class="rounded-lg px-3 py-1.5 transition">✅ تسک‌ها</button>
               <button data-tab="phases" class="rounded-lg px-3 py-1.5 transition">${Util.icon('timeline', 'text-sm')} فازها</button>
               <button data-tab="versions" class="rounded-lg px-3 py-1.5 transition">${Util.icon('new_releases', 'text-sm')} نسخه‌ها</button>
+              <button data-tab="activity" class="rounded-lg px-3 py-1.5 transition">${Util.icon('history', 'text-sm')} گزارش</button>
+            </div>
+            <div class="relative">
+              <button id="project-settings-btn" class="btn-ghost h-8 w-8 px-0 text-cream/50 hover:text-cream" title="تنظیمات پروژه">${Util.icon('tune', 'text-lg')}</button>
+              <div id="project-settings-menu" class="absolute left-0 top-10 z-40 hidden w-56 overflow-hidden rounded-xl border border-white/10 bg-navy/95 p-1 shadow-2xl shadow-black/50 backdrop-blur-2xl"></div>
             </div>
           </div>
           <div id="project-progress" class="mt-2"></div>
@@ -67,8 +72,7 @@ const Projects = {
     Util.byId('main').querySelectorAll('[data-tab]').forEach((btn) =>
       btn.addEventListener('click', () => Projects.setTab(btn.dataset.tab)));
 
-    Projects.paintCodeChip(data.project);
-    Projects.paintDeleteBtn(data.project);
+    Projects.paintSettingsBtn(data.project);
     Projects.paintRepoChip(data.project);
     Projects.loadProgress(projectId);
     Projects.loadStats(projectId);
@@ -130,6 +134,7 @@ const Projects = {
     else if (tab === 'tasks') Tasks.open(id);
     else if (tab === 'phases') Projects.renderPhases(id);
     else if (tab === 'versions') Projects.renderVersions(id);
+    else if (tab === 'activity') Projects.renderActivity(id, false);
   },
 
   async loadProgress(projectId) {
@@ -180,61 +185,149 @@ const Projects = {
     });
   },
 
-  /** Invite code chip (copy + rotate for owners) and the delete button. */
-  paintCodeChip(project) {
-    const chip = Util.byId('repo-chip');
-    if (!chip) return;
-    const codeBtn = document.createElement('button');
-    codeBtn.id = 'project-code-btn';
-    codeBtn.className = 'inline-flex items-center gap-1 rounded-lg bg-white/5 px-2 py-0.5 transition hover:bg-white/10';
-    codeBtn.innerHTML = `${Util.icon('key', 'text-sm')} کد: <span class="font-mono font-bold text-cyan">${Util.esc(project.invite_code || '—')}</span>`;
-    codeBtn.addEventListener('click', async () => {
-      if (!project.invite_code) return;
-      await navigator.clipboard.writeText(project.invite_code);
-      App.toast('کد دعوت پروژه کپی شد', false);
-    });
-    chip.prepend(codeBtn);
-  },
+  /** ⚙ settings dropdown: edit, code, activity, leave, delete. */
+  paintSettingsBtn(project) {
+    const btn = Util.byId('project-settings-btn');
+    const menu = Util.byId('project-settings-menu');
+    if (!btn || !menu) return;
 
-  paintDeleteBtn(project) {
-    const isProjectOwner = project.owner_id === App.state.user.id;
-    const team = App.state.teams.find((t) => t.id === project.team_id);
-    const isTeamOwner = team && team.owner_id === App.state.user.id;
-    if (!isProjectOwner && !isTeamOwner) return;
-
-    const header = Util.byId('main').querySelector('.glass.shrink-0');
-    if (!header) return;
-    const btn = document.createElement('button');
-    btn.id = 'project-delete-btn';
-    btn.className = 'btn-ghost h-8 w-8 px-0 text-rose-300/50 hover:bg-rose-500/10 hover:text-rose-300';
-    btn.title = 'حذف کامل پروژه';
-    btn.innerHTML = Util.icon('delete_forever', 'text-lg');
-    btn.addEventListener('click', () => {
-      App.modal({
-        title: 'حذف کامل پروژه؟',
-        customBody: `
-          <p class="text-xs leading-6 text-cream/60">پروژه‌ی <b class="text-vanilla">${Util.esc(project.name)}</b> به همراه همه‌ی تسک‌ها، پیام‌ها و فایل‌هایش برای همیشه حذف می‌شود. این کار برگشت‌پذیر نیست.</p>
-          <div class="flex gap-2 pt-2">
-            <button type="button" id="proj-del-cancel" class="btn-soft flex-1">انصراف</button>
-            <button type="button" id="proj-del-confirm" class="btn-danger flex-1">حذف قطعی</button>
-          </div>`,
-        onSubmit: async () => {},
-      });
-      Util.byId('proj-del-cancel').addEventListener('click', () => Util.byId('modal').close());
-      Util.byId('proj-del-confirm').addEventListener('click', async () => {
-        try {
-          await Api.request('projects/' + project.id, { method: 'DELETE' });
-          Util.byId('modal').close();
+    const isOwner = project.owner_id === App.state.user.id;
+    const iAmMember = (project.members || []).some((m) => m.id === App.state.user.id && m.role !== 'owner');
+    const items = [
+      { icon: 'edit', label: 'ویرایش پروژه و تیم‌ها', run: () => Projects.editModal(project), show: isOwner },
+      { icon: 'key', label: 'کپی کد دعوت', run: async () => {
+          await navigator.clipboard.writeText(project.invite_code || '');
+          App.toast('کد دعوت پروژه کپی شد', false);
+        }, show: true },
+      { icon: 'autorenew', label: 'کد دعوت جدید', run: async () => {
+          const d = await Api.request(`projects/${project.id}/code`, { method: 'POST' });
+          App.state.currentProject = d.project;
+          App.toast('کد دعوت جدید ساخته شد', false);
+        }, show: isOwner },
+      { icon: 'history', label: 'گزارش فعالیت‌ها', run: () => Projects.setTab('activity'), show: true },
+      { icon: 'logout', label: 'خروج از پروژه', run: async () => {
+          await Api.request(`projects/${project.id}/leave`, { method: 'POST' });
           App.state.currentProject = null;
           App.renderEmptyMain();
           await Projects.load();
-          App.toast('پروژه حذف شد', false);
-        } catch (err) {
-          App.toast(Util.errorFa(err));
-        }
-      });
+          App.toast('از پروژه خارج شدی', false);
+        }, show: iAmMember },
+      { icon: 'delete_forever', label: 'حذف کامل پروژه', run: () => Projects.confirmDelete(project), danger: true, show: isOwner || Projects.canManageViaTeam(project) },
+    ];
+
+    menu.innerHTML = items.filter((it) => it.show).map((it, i) => `
+      <button data-menu-item="${i}" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-right text-xs transition hover:bg-white/[0.08] ${it.danger ? 'text-rose-300' : 'text-cream/80'}">
+        ${Util.icon(it.icon, 'text-base')} ${it.label}
+      </button>`).join('');
+
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+    };
+    menu.querySelectorAll('[data-menu-item]').forEach((el) =>
+      el.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        menu.classList.add('hidden');
+        try { await items[Number(el.dataset.menuItem)].run(); }
+        catch (err) { App.toast(Util.errorFa(err)); }
+      }));
+  },
+
+  canManageViaTeam(project) {
+    const teamIds = String(project.team_ids || '').split(',').filter(Boolean).map(Number);
+    return App.state.teams.some((t) => t.owner_id === App.state.user.id && teamIds.includes(t.id));
+  },
+
+  /** Edit name/description and which teams the project belongs to. */
+  editModal(project) {
+    const teamIds = String(project.team_ids || '').split(',').filter(Boolean).map(Number);
+    App.modal({
+      title: 'ویرایش پروژه',
+      fields: [
+        { name: 'name', label: 'نام پروژه', value: project.name },
+        { name: 'description', label: 'توضیح', value: project.description || '', required: false },
+      ],
+      checkboxes: [{
+        name: 'team_ids',
+        label: 'تیم‌های پروژه (پروژه می‌تواند هم‌زمان در چند تیم باشد)',
+        options: App.state.teams.map((t) => ({ value: t.id, label: t.name, checked: teamIds.includes(t.id) })),
+      }],
+      submitLabel: 'ذخیره',
+      onSubmit: async (v) => {
+        const d = await Api.request('projects/' + project.id, {
+          method: 'PATCH',
+          body: { name: v.name, description: v.description || '', team_ids: v.team_ids || [] },
+        });
+        App.state.currentProject = d.project;
+        await Projects.load();
+        Projects.open(project.id, Projects.tab);
+        App.toast('پروژه به‌روز شد', false);
+      },
     });
-    header.appendChild(btn);
+  },
+
+  confirmDelete(project) {
+    App.modal({
+      title: 'حذف کامل پروژه؟',
+      customBody: `
+        <p class="text-xs leading-6 text-cream/60">پروژه‌ی <b class="text-vanilla">${Util.esc(project.name)}</b> به همراه همه‌ی تسک‌ها، پیام‌ها و فایل‌هایش برای همیشه حذف می‌شود. این کار برگشت‌پذیر نیست.</p>
+        <div class="flex gap-2 pt-2">
+          <button type="button" id="proj-del-cancel" class="btn-soft flex-1">انصراف</button>
+          <button type="button" id="proj-del-confirm" class="btn-danger flex-1">حذف قطعی</button>
+        </div>`,
+      onSubmit: async () => {},
+    });
+    Util.byId('proj-del-cancel').addEventListener('click', () => Util.byId('modal').close());
+    Util.byId('proj-del-confirm').addEventListener('click', async () => {
+      try {
+        await Api.request('projects/' + project.id, { method: 'DELETE' });
+        Util.byId('modal').close();
+        App.state.currentProject = null;
+        App.renderEmptyMain();
+        await Projects.load();
+        App.toast('پروژه حذف شد', false);
+      } catch (err) {
+        App.toast(Util.errorFa(err));
+      }
+    });
+  },
+
+  /** Shared activity log — who did what, visible to every member. */
+  async renderActivity(projectId, inModal = false) {
+    const data = await Api.request(`projects/${projectId}/activity`);
+    const list = (rows) => rows.length ? rows.map((a) => Projects.activityRow(a)).join('')
+      : '<p class="py-6 text-center text-xs text-cream/30">هنوز فعالیتی ثبت نشده</p>';
+
+    if (inModal) {
+      App.modal({
+        title: 'گزارش فعالیت‌های پروژه',
+        customBody: `<div class="max-h-[55vh] space-y-1 overflow-y-auto pe-1">${list(data.activities)}</div>`,
+        onSubmit: async () => {},
+      });
+      return;
+    }
+
+    Chat.stopPoll();
+    Tasks.stopPoll();
+    Util.byId('panel').innerHTML = `
+      <div class="h-full overflow-y-auto p-5">
+        <div class="mx-auto max-w-xl space-y-1.5">
+          <p class="px-1 text-[11px] text-cream/35">همه‌ی اعضا می‌توانند ببینند چه کسی چه کاری کرده</p>
+          ${list(data.activities)}
+        </div>
+      </div>`;
+  },
+
+  activityRow(a) {
+    const tone = a.action.includes('deleted') ? 'text-rose-300' : a.action.includes('created') || a.action.includes('done') ? 'text-mint' : 'text-cream/60';
+    return `
+      <div class="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">${Util.icon(Util.activityIcon(a.action), 'text-base ' + tone)}</div>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-xs text-cream/80">${Util.esc(a.detail || a.action)}</p>
+          <p class="text-[10px] text-cream/35">${Util.esc(a.user.display_name)} · ${Util.dateTimeFa(a.created_at)}</p>
+        </div>
+      </div>`;
   },
 
   // --------------------------------------------------------------- phases

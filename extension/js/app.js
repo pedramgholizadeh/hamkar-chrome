@@ -121,7 +121,7 @@ const App = {
   },
 
   /** Generic dialog: text inputs, textareas, or a fully custom body. */
-  modal({ title, fields = [], textareas = [], submitLabel = 'ثبت', customBody = null, onSubmit }) {
+  modal({ title, fields = [], textareas = [], checkboxes = [], submitLabel = 'ثبت', customBody = null, onSubmit }) {
     const dlg = Util.byId('modal');
     const form = Util.byId('modal-form');
     Util.byId('modal-title').textContent = title;
@@ -143,6 +143,17 @@ const App = {
         <span class="mb-1 block text-xs text-cream/45">${Util.esc(f.label)}</span>
         <textarea name="${Util.esc(f.name)}" rows="7" class="input resize-y font-mono text-xs leading-6" placeholder="${Util.esc(f.placeholder || '')}">${Util.esc(f.value || '')}</textarea>
       </label>`).join('')
+      + checkboxes.map((f) => `
+      <fieldset class="rounded-xl border border-white/10 p-3">
+        <legend class="px-1 text-xs text-cream/45">${Util.esc(f.label)}</legend>
+        <div class="max-h-36 space-y-1 overflow-y-auto">
+          ${f.options.map((o) => `
+          <label class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition hover:bg-white/[0.06]">
+            <input type="checkbox" name="${Util.esc(f.name)}" value="${Util.esc(o.value)}" ${o.checked ? 'checked' : ''} class="h-4 w-4 accent-accent" />
+            <span class="truncate">${Util.esc(o.label)}</span>
+          </label>`).join('')}
+        </div>
+      </fieldset>`).join('')
       + (submitLabel ? `
       <div class="flex gap-2 pt-1">
         <button type="submit" class="btn-primary flex-1">${Util.esc(submitLabel)}</button>
@@ -152,6 +163,9 @@ const App = {
     form.onsubmit = async (e) => {
       e.preventDefault();
       const values = Object.fromEntries(new FormData(form).entries());
+      for (const f of checkboxes) {
+        values[f.name] = [...form.querySelectorAll(`input[name="${f.name}"]:checked`)].map((el) => Number(el.value));
+      }
       try {
         await onSubmit(values);
         dlg.close();
@@ -238,7 +252,13 @@ const Updater = {
       const data = await res.json();
       const remote = String(data.tag_name || '').replace(/^v/, '');
       const local = chrome.runtime.getManifest().version;
-      const isNew = remote && Updater.compare(remote, local) > 0;
+      let isNew = remote && Updater.compare(remote, local) > 0;
+      // prefer commit comparison when build-info exists
+      try {
+        const build = await (await fetch(chrome.runtime.getURL('build-info.json'))).json();
+        const released = String(data.target_commitish || '').slice(0, 7);
+        if (build.commit && released) isNew = released !== build.commit;
+      } catch { /* no build info — version compare */ }
 
       const banner = Util.byId('update-banner');
       if (isNew && banner) {
@@ -269,6 +289,40 @@ Util.byId('join-project-btn').addEventListener('click', () => {
       App.toast('به پروژه اضافه شدی 🎉', false);
     },
   });
+});
+
+// presence heartbeat: being on the extension page = online
+setInterval(() => {
+  if (Api.token) Api.request('presence', { method: 'POST' }).catch(() => {});
+}, 45000);
+
+// close the project settings menu when clicking elsewhere
+document.addEventListener('click', (e) => {
+  const menu = Util.byId('project-settings-menu');
+  if (menu && !menu.classList.contains('hidden') && !e.target.closest('#project-settings-menu, #project-settings-btn')) {
+    menu.classList.add('hidden');
+  }
+});
+
+// version chip: version + commit, and an inline update button when newer
+Updater.check().then(async (info) => {
+  const text = Util.byId('version-text');
+  const commit = Util.byId('version-commit');
+  const update = Util.byId('version-update');
+  if (!text) return;
+  text.textContent = 'v' + chrome.runtime.getManifest().version;
+  try {
+    const build = await (await fetch(chrome.runtime.getURL('build-info.json'))).json();
+    commit.textContent = '· ' + build.commit;
+  } catch { /* dev mode without build-info */ }
+  if (info && info.isNew) {
+    update.classList.remove('hidden');
+    update.classList.add('inline-flex');
+    Util.byId('version-chip').onclick = () => {
+      window.open(info.url, '_blank');
+      App.toast('زیپ جدید را دانلود، پوشه را جایگزین و اکستنشن را Reload کن — دیتا سرور جاست و چیزی از دست نمی‌ره', false);
+    };
+  }
 });
 
 App.boot();

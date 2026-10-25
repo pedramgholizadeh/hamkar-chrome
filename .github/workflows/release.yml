@@ -27,6 +27,10 @@ jobs:
         id: ver
         run: echo "version=$(node -p "require('./extension/manifest.json').version")" >> "$GITHUB_OUTPUT"
 
+      - name: Write build info (commit sha for the in-panel updater)
+        run: |
+          printf '{"commit":"%s","built_at":"%s"}\n' "${GITHUB_SHA::7}" "$(date -u +%FT%TZ)" > extension/build-info.json
+
       - name: Pack extension zip
         run: |
           mkdir -p dist

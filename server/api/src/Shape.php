@@ -20,6 +20,7 @@ final class Shape
             'display_name' => self::displayName($u),
             'avatar_file_id' => isset($u['avatar_file_id']) && $u['avatar_file_id'] !== null ? (int) $u['avatar_file_id'] : null,
             'online' => $online,
+            'last_seen_at' => $u['last_seen_at'] ?? null,
         ];
     }
 

@@ -35,9 +35,9 @@ const App = {
     app.classList.add('flex');
 
     App.renderHeaderUser();
-    App.renderEmptyMain();
-    Teams.load().catch(() => {});
-    Projects.load().catch(() => {});
+    App.renderHome();
+    Teams.load().then(() => { if (!App.state.currentTeam && !App.state.currentProject) App.renderHome(); }).catch(() => {});
+    Projects.load().then(() => { if (!App.state.currentTeam && !App.state.currentProject) App.renderHome(); }).catch(() => {});
     App.loadInvites();
     Friends.load();
     Updater.check();
@@ -51,6 +51,148 @@ const App = {
       + `<span id="header-avatar" class="inline-block align-middle"></span>`;
     const slot = Util.byId('header-avatar');
     if (slot) slot.innerHTML = await Util.avatarHtml(u, 'h-7 w-7 text-[10px]');
+  },
+
+  /** New-tab home: team carousel, projects, and my open tasks. */
+  renderHome() {
+    const teams = App.state.teams;
+    const projects = App.state.projects;
+
+    if (!teams.length && !projects.length) {
+      const action = (id, icon, title, sub, cls) => `
+        <button id="${id}" class="panel col-span-2 flex flex-col items-start gap-2 p-5 text-right transition hover:border-accent/40">
+          <div class="flex h-11 w-11 items-center justify-center rounded-2xl ${cls}">${Util.icon(icon, 'ms-fill text-2xl text-white')}</div>
+          <p class="text-sm font-bold text-vanilla">${title}</p>
+          <p class="text-[11px] leading-5 text-cream/40">${sub}</p>
+        </button>`;
+      Util.byId('main').innerHTML = `
+        <div class="flex h-full flex-col items-center justify-center p-8">
+          <div class="w-full max-w-md">
+            <p class="mb-4 text-center text-sm text-cream/50">👋 خوش آمدی — از کجا شروع کنیم؟</p>
+            <div class="grid grid-cols-6 gap-3">
+              ${action('qa-team', 'group_add', 'تیم جدید بساز', 'همکارانت را دور هم جمع کن', 'bg-gradient-to-br from-accent to-accent/60')}
+              ${action('qa-project', 'rocket_launch', 'پروژه‌ی جدید', 'کارها را فازبندی و پیگیری کن', 'bg-gradient-to-br from-cyan to-cyan/50')}
+              ${action('qa-join', 'key', 'عضویت با کد', 'با کد دعوت به تیم بپیوند', 'bg-gradient-to-br from-fuchsia-500 to-fuchsia-500/50')}
+            </div>
+          </div>
+        </div>`;
+      Util.byId('qa-team').addEventListener('click', () => Util.byId('new-team-btn').click());
+      Util.byId('qa-project').addEventListener('click', () => Util.byId('new-project-btn').click());
+      Util.byId('qa-join').addEventListener('click', () => Util.byId('join-team-btn').click());
+      return;
+    }
+
+    const projectCard = (p) => `
+      <button data-home-project="${p.id}" class="panel flex items-center gap-3 p-3.5 text-right transition hover:border-cyan/40">
+        ${Util.icon('folder_open', 'text-lg text-cyan')}
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-xs font-bold text-vanilla">${Util.esc(p.name)}</span>
+          <span class="block truncate text-[10px] text-cream/35">${p.team_name ? Util.esc(p.team_name) : 'پروژه‌ی شخصی'}</span>
+        </span>
+        ${Util.icon('chevron_left', 'text-base text-cream/25')}
+      </button>`;
+
+    Util.byId('main').innerHTML = `
+      <div class="h-full overflow-y-auto p-6">
+        <div class="mx-auto max-w-4xl space-y-7">
+
+          ${teams.length ? `
+          <section>
+            <h2 class="mb-3 flex items-center gap-2 text-sm font-bold text-vanilla">${Util.icon('groups', 'text-base text-accent')} تیم‌های من</h2>
+            <div class="flex snap-x gap-3 overflow-x-auto pb-2">
+              ${teams.map((t) => `
+                <button data-home-team="${t.id}" class="panel w-44 shrink-0 snap-start p-4 text-right transition hover:border-accent/40">
+                  <span data-home-team-logo="${t.id}" class="block"></span>
+                  <p class="mt-2 truncate text-sm font-bold text-vanilla">${Util.esc(t.name)}</p>
+                  <p class="text-[10px] text-cream/40">${t.role === 'owner' ? '👑 مالک تیم' : 'عضو تیم'}</p>
+                </button>`).join('')}
+            </div>
+          </section>` : ''}
+
+          ${projects.length ? `
+          <section>
+            <h2 class="mb-3 flex items-center gap-2 text-sm font-bold text-vanilla">${Util.icon('folder_open', 'text-base text-cyan')} پروژه‌ها</h2>
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              ${projects.map(projectCard).join('')}
+            </div>
+          </section>` : ''}
+
+          <section>
+            <h2 class="mb-3 flex items-center gap-2 text-sm font-bold text-vanilla">${Util.icon('checklist', 'text-base text-mint')} کارهایی که باید انجام بدهی</h2>
+            <div id="home-tasks" class="grid gap-2 sm:grid-cols-2"><p class="text-xs text-cream/30">در حال بارگذاری…</p></div>
+          </section>
+
+        </div>
+      </div>`;
+
+    // team logos (image or initial)
+    Util.byId('main').querySelectorAll('[data-home-team-logo]').forEach(async (slot) => {
+      const team = teams.find((t) => t.id === Number(slot.dataset.homeTeamLogo));
+      if (!team) return;
+      if (team.logo_file_id) {
+        const url = await MediaStore.url(team.logo_file_id);
+        if (url) {
+          slot.innerHTML = `<img src="${url}" class="h-12 w-12 rounded-2xl object-cover" alt="" />`;
+          return;
+        }
+      }
+      slot.innerHTML = `<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-accent/40 to-cyan/20 text-lg font-extrabold text-white">${Util.esc(team.name.charAt(0))}</span>`;
+    });
+
+    const main = Util.byId('main');
+    main.querySelectorAll('[data-home-team]').forEach((btn) =>
+      btn.addEventListener('click', () => Teams.open(Number(btn.dataset.homeTeam))));
+    main.querySelectorAll('[data-home-project]').forEach((btn) =>
+      btn.addEventListener('click', () => Projects.open(Number(btn.dataset.homeProject))));
+
+    App.loadHomeTasks(projects);
+  },
+
+  /** My open tasks across every project, newest/deadline first. */
+  async loadHomeTasks(projects) {
+    const box = Util.byId('home-tasks');
+    if (!box) return;
+    const mine = [];
+    await Promise.all(projects.map(async (p) => {
+      try {
+        const d = await Api.request(`projects/${p.id}/tasks`);
+        for (const t of d.tasks) {
+          if (!t.done && t.assignee && t.assignee.id === App.state.user.id) mine.push({ ...t, project: p });
+        }
+      } catch { /* skip unreachable project */ }
+    }));
+    if (!Util.byId('home-tasks')) return;
+
+    if (!mine.length) {
+      box.innerHTML = '<div class="panel col-span-2 p-5 text-center text-xs text-cream/35">هیچ کار بازی برای تو نیست — عالیه! ☕</div>';
+      return;
+    }
+    mine.sort((a, b) => (a.due_date || '9999').localeCompare(b.due_date || '9999') || b.id - a.id);
+
+    box.innerHTML = mine.slice(0, 12).map((t) => {
+      const overdue = t.due_date && t.due_date < new Date().toISOString().slice(0, 10);
+      return `
+      <div class="panel flex items-center gap-3 p-3">
+        <input type="checkbox" data-home-task="${t.id}" class="h-5 w-5 shrink-0 cursor-pointer accent-accent" />
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-xs font-medium text-cream/90">${Util.esc(t.title)}</p>
+          <p class="truncate text-[10px] text-cream/35">${Util.esc(t.project.name)}${t.due_date ? ` · <span class="${overdue ? 'text-rose-300' : ''}">${Util.icon('event', 'text-xs')}${Util.dateFa(t.due_date + ' 00:00:00')}</span>` : ''}</p>
+        </div>
+        <span class="chip shrink-0 ${t.priority === 'high' ? 'bg-rose-500/15 text-rose-300' : t.priority === 'low' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}">${{ high: 'فوری', medium: 'عادی', low: 'کم' }[t.priority] || ''}</span>
+      </div>`;
+    }).join('');
+
+    box.querySelectorAll('[data-home-task]').forEach((cb) =>
+      cb.addEventListener('change', async () => {
+        try {
+          await Api.request('tasks/' + cb.dataset.homeTask, { method: 'PATCH', body: { done: cb.checked } });
+          if (cb.checked) App.toast('انجام شد ✓', false);
+          App.loadHomeTasks(App.state.projects);
+          if (App.state.currentProject) Projects.loadProgress(App.state.currentProject.id);
+        } catch (err) {
+          App.toast(Util.errorFa(err));
+        }
+      }));
   },
 
   renderEmptyMain() {
